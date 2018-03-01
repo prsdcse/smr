@@ -1,5 +1,5 @@
 import React from 'react';
-import { StyleSheet, View, ScrollView, DatePickerAndroid, Switch } from 'react-native';
+import { StyleSheet, View, ScrollView, DatePickerAndroid, ToastAndroid } from 'react-native';
 import {
     FormRow, colors, Button, AddCardHeader,
     FormInput, FormLabel, Text
@@ -130,6 +130,11 @@ export default class AddIndividualScreen extends React.Component {
             console.log('householdObj', householdObj);
             realm.write(() => {
                 realm.create('Household', householdObj);
+                ToastAndroid.show(
+                    'Individual information saved',
+                    ToastAndroid.SHORT,
+                    ToastAndroid.CENTER
+                );
                 navigate('HouseHold', { HouseholdID: params.HouseholdID, HouseholdStatus: params.HouseholdStatus });
             });
         } else {

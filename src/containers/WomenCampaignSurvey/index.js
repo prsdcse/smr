@@ -1,5 +1,5 @@
 import React from 'react';
-import { StyleSheet, ScrollView, View, Alert, DatePickerAndroid } from 'react-native';
+import { StyleSheet, ScrollView, View, Alert, DatePickerAndroid, ToastAndroid } from 'react-native';
 import moment from 'moment';
 import _ from 'lodash';
 import ValidationComponent from 'react-native-form-validator';
@@ -430,14 +430,30 @@ export default class WomenCampaignSurvey extends ValidationComponent {
                 realm.write(() => {
                     realm.create('SurveyInformation', { surveyID, surveyData: JSON.stringify(this.state), status: 'saved' }, true);
                 });
-                this.removeBloodSampleCount();
+                if (this.state.ws1scollect === '01' || this.state.ws7dcollect === '01') {
+                    this.addBloodSampleCount();
+                } else {
+                    this.removeBloodSampleCount();
+                }
+                ToastAndroid.show(
+                    'Women campaign information updated',
+                    ToastAndroid.SHORT,
+                    ToastAndroid.CENTER
+                );
                 navigate('CompletedSurveyDetails');
             } else {
                 surveyID = realm.objects('SurveyInformation').filtered('status = "open" && Sno = $0 && HouseholdID=$1 && AgeGroup=$2', params.person.Sno, params.HouseholdID, params.person.AgeGroup)[0].surveyID;
                 realm.write(() => {
                     realm.create('SurveyInformation', { surveyID, surveyData: JSON.stringify(this.state), status: 'inprogress' }, true);
                 });
-                this.addBloodSampleCount();
+                if (this.state.ws1scollect === '01' || this.state.ws7dcollect === '01') {
+                    this.addBloodSampleCount();
+                }
+                ToastAndroid.show(
+                    'Women campaign Survey information saved',
+                    ToastAndroid.SHORT,
+                    ToastAndroid.CENTER
+                );
                 navigate('RandomListScreen');
             }
         } else {
@@ -457,9 +473,7 @@ export default class WomenCampaignSurvey extends ValidationComponent {
             if (realm.objects('BloodSample').filtered('Submitted = "active" && clusterID = $0', clusterID).length > 0) {
                 const bloodsampleid = realm.objects('BloodSample').filtered('Submitted = "active" && clusterID = $0', clusterID)[0].id;
                 const bloodSampleData = realm.objects('BloodSample').filtered('clusterID=$0', clusterID)[0].TypeC;
-                if (this.state.ws1scollect === '01' || this.state.ws7dcollect === '01') {
-                    realm.create('BloodSample', { id: bloodsampleid, TypeC: bloodSampleData + 1 }, true);
-                }
+                realm.create('BloodSample', { id: bloodsampleid, TypeC: bloodSampleData + 1 }, true);
             } else {
                 realm.create('BloodSample', { id: new Date().getTime(), clusterID, TypeC: 1 });
             }

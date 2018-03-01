@@ -86,7 +86,6 @@ export default class ViewSurveyDetails extends React.Component {
                                 rightIcon={'pencil-square'}
                                 rightIconClick={() => navigate('HouseholdForm', { HouseholdID: params.HouseholdID })}
                             />
-                            <Text style={{ fontSize: 25, marginLeft: 30 }}> {`${this.state.personList.length - 1} Member(s) Available`} </Text>
                         </View>
                     }
                     {(this.state.householdSurveyStatus) &&
@@ -96,32 +95,31 @@ export default class ViewSurveyDetails extends React.Component {
                                 heading={`Household form for HH ID: ${params.HouseholdID}`}
                                 rightIcon={'check-square-o'}
                             />
-                            {this.state.personList.map((person, index) => (<View key={index}>
-                                {(person.AgeGroup != 'H') &&
-                                    <View>
-                                        {(person.status != 'open') &&
-                                            <WalletHeader
-                                                headingIcon={person.Sex}
-                                                heading={`${person.Name} / ${person.AgeDis} / ${person.AgeGroup == 'C' ? 'Women campaign Form' : 'Children campaign Form'}`}
-                                                rightIcon='check-square-o'
-                                            />
-                                        }
-                                        {(person.status == 'open') &&
-                                            <WalletHeader
-                                                headingIcon={person.Sex}
-                                                heading={`${person.Name} / ${person.AgeDis} / ${person.AgeGroup == 'C' ? 'Women campaign Form' : 'Children campaign Form'}`}
-                                                rightIcon='pencil-square'
-                                                rightIconClick={() => person.AgeGroup == 'C' ? navigate('WomenCampaignSurvey', { HouseholdID: params.HouseholdID, person: JSON.parse(JSON.stringify(person)) }) : navigate('ChildCampaignSurvey', { HouseholdID: params.HouseholdID, person: JSON.parse(JSON.stringify(person)) })}
-                                            />
-                                        }
-                                    </View>
-                                }
-                            </View>), this)}
                         </View>
                     }
-
+                    {this.state.personList.map((person, index) => (<View key={index}>
+                        {(person.AgeGroup != 'H') &&
+                            <View>
+                                {(person.status != 'open') &&
+                                    <WalletHeader
+                                        headingIcon={person.Sex}
+                                        heading={`${person.Name} / ${person.AgeDis} / ${person.AgeGroup == 'C' ? 'Women campaign Form' : 'Children campaign Form'}`}
+                                        rightIcon='check-square-o'
+                                    />
+                                }
+                                {(person.status == 'open') &&
+                                    <WalletHeader
+                                        headingIcon={person.Sex}
+                                        heading={`${person.Name} / ${person.AgeDis} / ${person.AgeGroup == 'C' ? 'Women campaign Form' : 'Children campaign Form'}`}
+                                        rightIcon='pencil-square'
+                                        rightIconClick={() => person.AgeGroup == 'C' ? navigate('WomenCampaignSurvey', { HouseholdID: params.HouseholdID, person: JSON.parse(JSON.stringify(person)) }) : navigate('ChildCampaignSurvey', { HouseholdID: params.HouseholdID, person: JSON.parse(JSON.stringify(person)) })}
+                                    />
+                                }
+                            </View>
+                        }
+                    </View>), this)}
                 </ScrollView>
-            </View>
+            </View >
         );
     }
 }

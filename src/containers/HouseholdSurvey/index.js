@@ -1,5 +1,5 @@
 import React from 'react';
-import { StyleSheet, DatePickerAndroid, ScrollView, View, Alert, TextInput } from 'react-native';
+import { StyleSheet, DatePickerAndroid, ScrollView, View, Alert, ToastAndroid } from 'react-native';
 import moment from 'moment';
 import _ from 'lodash';
 import ValidationComponent from 'react-native-form-validator';
@@ -103,7 +103,7 @@ export default class HouseHoldSurvey extends ValidationComponent {
         this.headofHouseholdEducation = [
             { value: '01', label: 'Professional or honors' },
             { value: '02', label: 'Graduate or postgraduate' },
-            { value: '03', label: 'Intermediate/post-high school diploma' },
+            { value: '03', label: 'Senior/Higher Secondary' },
             { value: '04', label: 'High School Certificate' },
             { value: '05', label: 'Middle School Certificate' },
             { value: '06', label: 'Primary School Certificate' },
@@ -113,13 +113,13 @@ export default class HouseHoldSurvey extends ValidationComponent {
 
 
         this.householdOccupation = [
-            { value: '01', label: 'Professional' },
-            { value: '02', label: 'Sales worker' },
-            { value: '03', label: 'Service worker' },
-            { value: '04', label: 'Production worker (skilled)' },
-            { value: '05', label: 'Production worker (unskilled)' },
-            { value: '06', label: 'Agricultural worker' },
-            { value: '07', label: 'Home maker' },
+            { value: '01', label: 'Professionals/Managers/Senior officials/legislators' },
+            { value: '02', label: 'Technicians and associate professionals' },
+            { value: '03', label: 'Clerks/Clerical support workers' },
+            { value: '04', label: 'Service and sales workers' },
+            { value: '05', label: 'Agricultural and fishery workers' },
+            { value: '06', label: 'Craft and related trade workers' },
+            { value: '07', label: 'Homemaker' },
             { value: '08', label: 'Unemployed' },
             { value: '09', label: 'Student' },
             { value: '88', label: 'Don’t know' }
@@ -281,18 +281,18 @@ export default class HouseHoldSurvey extends ValidationComponent {
                         if (!this.state[fieldKey] || (this.state[fieldKey] === -1)) {
                             if (this.state[fieldKey] === 0) {
                                 validation[fieldKey] = true;
-                            }                            else {
+                            } else {
                                 validation[fieldKey] = false;
                             }
                         } else {
                             validation[fieldKey] = true;
                         }
-                    }                    else {
+                    } else {
                         validation[fieldKey] = true;
                     }
                 });
             }
-        }        else {
+        } else {
             validation.h6astatusvis1 = false;
         }
         console.log('validation', validation);
@@ -347,12 +347,22 @@ export default class HouseHoldSurvey extends ValidationComponent {
                 surveyID = realm.objects('SurveyInformation').filtered('AgeGroup = "H" && status = "saved" && HouseholdID=$0', params.HouseholdID)[0].surveyID;
                 realm.write(() => {
                     realm.create('SurveyInformation', { surveyID, surveyData: JSON.stringify(this.state), status: 'saved' }, true);
+                    ToastAndroid.show(
+                        'Household Survey information updated',
+                        ToastAndroid.SHORT,
+                        ToastAndroid.CENTER
+                    );
                     navigate('CompletedSurveyDetails');
                 });
             } else {
                 surveyID = realm.objects('SurveyInformation').filtered('AgeGroup = "H" && status = "open" && HouseholdID=$0', params.HouseholdID)[0].surveyID;
                 realm.write(() => {
                     realm.create('SurveyInformation', { surveyID, surveyData: JSON.stringify(this.state), status: 'inprogress' }, true);
+                    ToastAndroid.show(
+                        'Household Survey information saved',
+                        ToastAndroid.SHORT,
+                        ToastAndroid.CENTER
+                    );
                     navigate('RandomListScreen');
                 });
             }
@@ -412,7 +422,7 @@ export default class HouseHoldSurvey extends ValidationComponent {
                 {this.state.h6astatusvis1 === '01' &&
                     <View>
                         <View style={{ marginBottom: 20 }}>
-                            <Text style={styles.headingLetter}>4. Respondent to household questionnaire*</Text>
+                            <Text style={styles.headingLetter}>4. Respondent name to household questionnaire*</Text>
                             <FormInput
                                 ref='h8respondentname'
                                 value={this.state.h8respondentname}

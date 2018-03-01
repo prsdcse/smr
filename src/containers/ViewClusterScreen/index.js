@@ -117,6 +117,7 @@ export default class ViewClusterScreen extends React.Component {
                                     this.setState({
                                         loading: false
                                     });
+                                    alert('Enumeration data submitted to server successfully');
                                     dispatch({ type: 'goToDashboard' });
                                 });
                             })

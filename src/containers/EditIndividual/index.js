@@ -1,5 +1,5 @@
 import React from 'react';
-import { StyleSheet, View, ScrollView, DatePickerAndroid, Switch } from 'react-native';
+import { StyleSheet, View, ScrollView, DatePickerAndroid, ToastAndroid } from 'react-native';
 import RadioForm, { RadioButton, RadioButtonInput, RadioButtonLabel } from 'react-native-simple-radio-button';
 import {
     FormRow, colors, Button, AddCardHeader,
@@ -107,6 +107,12 @@ export default class EditIndividual extends React.Component {
             realm.write(() => {
                 realm.create('Household', householdObj, true);
             });
+            ToastAndroid.show(
+                'Individual information updated',
+                ToastAndroid.SHORT,
+                ToastAndroid.CENTER
+            );
+            navigate;
             navigate('ViewCluster');
         } else {
             alert('Mandatory fields cannot be left empty');

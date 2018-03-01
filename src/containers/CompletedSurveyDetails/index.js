@@ -81,6 +81,7 @@ export default class CompletedSurveyDetails extends React.Component {
                                         this.setState({
                                             loading: false
                                         });
+                                        alert('Survey data submitted to server successfully');
                                         dispatch({ type: 'goToDashboard' });
                                     });
                                 })

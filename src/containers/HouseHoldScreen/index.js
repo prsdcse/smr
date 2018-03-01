@@ -1,5 +1,5 @@
 import React from 'react';
-import { StyleSheet, View, Text, ScrollView, ActivityIndicator } from 'react-native';
+import { StyleSheet, View, Text, ScrollView, ActivityIndicator, ToastAndroid } from 'react-native';
 import _ from 'lodash';
 import moment from 'moment';
 import {
@@ -21,7 +21,7 @@ export default class HouseHoldScreen extends React.Component {
       HouseholdStatus6: false,
       HouseholdID: '',
       HouseholdStatus: '1',
-      HouseholdStatusValue: 'Complete',
+      HouseholdStatusValue: 'Complete, verbal assent provided',
       personList: [],
       clusterID: '',
       villageName: '',
@@ -88,7 +88,7 @@ export default class HouseHoldScreen extends React.Component {
         this.setState({
           HouseholdStatus1: true,
           HouseholdStatus: '1',
-          HouseholdStatusValue: 'Complete',
+          HouseholdStatusValue: 'Complete, verbal assent provided',
           HouseholdStatus2: false
         });
       } else if (params.HouseholdStatus === '2') {
@@ -160,6 +160,12 @@ export default class HouseHoldScreen extends React.Component {
             realm.create('HouseholdNumber', { HouseholdStatus: this.state.HouseholdStatus, HouseholdID: this.state.HouseholdID, HouseholdPrimary, Submitted: 'inprogress', clusterID: this.state.clusterID });
           });
           //this.setState({ loading: false });
+          ToastAndroid.show(
+            'Household information saved',
+            ToastAndroid.SHORT,
+            ToastAndroid.CENTER
+          );
+          
           navigate('Dashboard');
         } else {
           this.savehouseholdInformation();
@@ -186,6 +192,11 @@ export default class HouseHoldScreen extends React.Component {
       personList: []
     });
     //this.setState({ loading: false });
+    ToastAndroid.show(
+      'Household information saved',
+      ToastAndroid.SHORT,
+      ToastAndroid.CENTER
+    );
     navigate('Dashboard');
   }
 
@@ -224,7 +235,7 @@ export default class HouseHoldScreen extends React.Component {
           </View>
           <Text style={styles.headingLetter1}>Household Status</Text>
           <RadioButton
-            title='Complete'
+            title='Complete, verbal assent provided'
             textStyle={{ color: '#4B5461', opacity: 0.8, fontSize: 20 }}
             checkedIcon='dot-circle-o'
             uncheckedIcon='circle-o'
@@ -237,7 +248,7 @@ export default class HouseHoldScreen extends React.Component {
               HouseholdStatus6: false,
               HouseholdStatus7: false,
               HouseholdStatus: '1',
-              HouseholdStatusValue: 'Complete'
+              HouseholdStatusValue: 'Complete, verbal assent provided'
             })}
             size={17}
             containerStyle={{ backgroundColor: 'transparent', borderColor: 'transparent' }}

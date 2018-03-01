@@ -148,20 +148,20 @@ export default class DashboardScreen extends React.Component {
 
 const styles = StyleSheet.create({
   headingLetter1: {
-    color: '#3E4A59',
+    color: 'green',
     fontWeight: '700',
     fontSize: 23,
     marginLeft: 20,
     marginTop: 50,
-    textAlign: 'center',
+    textAlign: 'center'
   },
   headingLetter2: {
-    color: '#3E4A59',
+    color: 'red',
     fontWeight: '700',
     fontSize: 23,
     marginLeft: 20,
     marginTop: 10,
-    textAlign: 'center',
+    textAlign: 'center'
   },
   headingLetterMain: {
     color: '#3E4A59',

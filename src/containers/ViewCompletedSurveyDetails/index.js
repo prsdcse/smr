@@ -60,6 +60,7 @@ export default class ViewCompletedSurveyDetails extends React.Component {
                     realm.create('SurveyInformation', { surveyID: survey.surveyID, status: 'saved' }, true);
                 });
             });
+            
             dispatch({ type: 'goToRandomListScreen' });
         }
     }

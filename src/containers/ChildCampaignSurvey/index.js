@@ -1,5 +1,6 @@
 import React from 'react';
-import { StyleSheet, ScrollView, View, Alert, DatePickerAndroid } from 'react-native';
+import { StyleSheet, ScrollView, View, Alert, DatePickerAndroid,ToastAndroid } from 'react-native';
+import _ from 'lodash';
 import moment from 'moment';
 import ValidationComponent from 'react-native-form-validator';
 import RadioForm from 'react-native-simple-radio-button';
@@ -261,6 +262,9 @@ export default class ChildCampaignSurvey extends ValidationComponent {
             selectedDate: '',
             surveyType: '',
             c2name: '',
+            c3dob: '',
+            c9adobdt: '',
+            c10age: '',
             c3areason: '',
             c4resname: '',
             c5resrelation: '',
@@ -268,9 +272,6 @@ export default class ChildCampaignSurvey extends ValidationComponent {
             c6bmomage: '',
             c7momeducation: '',
             c8momoccupation: '',
-            c3dob: '',
-            c9adobdt: '',
-            c10age: '',
             c11campaignlive: '',
             c12campaignaware: '',
             c13campaignhear1: '',
@@ -286,7 +287,6 @@ export default class ChildCampaignSurvey extends ValidationComponent {
             c18reason2: '',
             c18reason3: '',
             c18reason4: '',
-            c18reason5: '',
             c19bmcvroutrecfac: '',
             c19mcvroutrec: '',
             c19amcvroutrecdose: '',
@@ -307,11 +307,11 @@ export default class ChildCampaignSurvey extends ValidationComponent {
             c24bopv0doc: '',
             c24bopv0day: '',
             c24fopv1doc: '',
-            C24FOPVDAY1: '',
+            c24fopvday1: '',
             c24gopv2doc: '',
-            C24GOPVDAY2: '',
+            c24gopvday2: '',
             c24hopv3doc: '',
-            C24HOPVDAY3: '',
+            c24hopvday3: '',
             c24gipvdoc: '',
             c24gipvdocday: '',
             c24cpenta1doc: '',
@@ -353,8 +353,6 @@ export default class ChildCampaignSurvey extends ValidationComponent {
             cs1ascollectno: '',
             cs1bscollectoth: '',
             cs1scollecthow: '',
-            cs2sdate: '',
-            cs3stime: '',
             cs4sspecid: '',
             cs5squal: '',
             cs6sproblem: '',
@@ -362,8 +360,6 @@ export default class ChildCampaignSurvey extends ValidationComponent {
             cs7dcollect: '',
             cs7adcollectno: '',
             cs7bdcollectoth: '',
-            cs8ddate: '',
-            cs9dtime: '',
             cs10dspecid: '',
             cs11dspots: '',
             cs12adqual1: '',
@@ -497,10 +493,309 @@ export default class ChildCampaignSurvey extends ValidationComponent {
         this.setState({ formValue: value });
     }
 
+    checkValidationField(fieldName, validation) {
+        if (!this.state[fieldName] || (this.state[fieldName] === -1)) {
+            if (this.state[fieldName] === 0) {
+                validation[fieldName] = true;
+            } else {
+                validation[fieldName] = false;
+            }
+        } else {
+            validation[fieldName] = true;
+        }
+    }
+
+    validateRadioOptions() {
+        const { params } = this.props.navigation.state;
+        const validation = [];
+        const otherStateFields = ['c2name', 'c3dob', 'c9adobdt', 'c10age',
+            'c3areason', 'c4resname', 'c15campaignlocatsp', 'c22bmcvday1', 'c23bmcvday1',
+            'c24abcgday', 'c24bhepatitisday', 'c24bopv0day', 'c24fopvday1', 'c24gopvday2', 'c24hopvday3', 'c24gipvdocday', 'c24cpentaday1', 'c24dpentaday1', 'c24epentaday3',
+            'c24krota1day', 'c24lrot2day', 'c24mrota3day', 'c24nje1day', 'c24oje2day', 'c25dopvdose', 'c30apentadose', 'c31arotadose', 'c32ajedose', 'c26intcomments', 'cs1bscollectoth',
+            'cs4sspecid', 'cs6asprobsp', 'cs7bdcollectoth', 'cs10dspecid', 'cs13adprobsp', 'cs15intcomments'];
+        if (this.state.c3dob) {
+        } else {
+            validation.c3dob = false;
+        }
+        if (this.state.eligible) {
+            this.checkValidationField('c3areason', validation);
+            if (this.state.c3areason === '01') {
+                const consetValues = ['c5resrelation', 'c6amomalive'];
+                _.forEach(consetValues, (fieldKey) => {
+                    this.checkValidationField(fieldKey, validation);
+                });
+                if (this.state.c6amomalive === '01') {
+                    const momAliveVal = ['c7momeducation', 'c8momoccupation'];
+                    _.forEach(momAliveVal, (fieldKey) => {
+                        this.checkValidationField(fieldKey, validation);
+                    });
+                }
+                if (this.state.surveyType === '02') {
+                    const surveyTypeOptions = ['c11campaignlive', 'c12campaignaware',
+                        'c13campaignhear1', 'c13campaignhear2', 'c13campaignhear3',
+                        'c13aschool', 'c14campaignmrrec', 'c15campaignlocat', 'c16campaigncard', 'c17campaigndose'];
+                    _.forEach(surveyTypeOptions, (fieldKey) => {
+                        this.checkValidationField(fieldKey, validation);
+                    });
+                    if (this.state.c14campaignmrrec === '02') {
+                        const campaignReason = ['c18reason1', 'c18reason2', 'c18reason3', 'c18reason4'];
+                        _.forEach(campaignReason, (fieldKey) => {
+                            this.checkValidationField(fieldKey, validation);
+                        });
+                    }
+                }
+                if (params.person.AgeGroup == 'A') {
+                    this.checkValidationField('c19mcvroutrec', validation);
+                    if (this.state.c19mcvroutrec == '01') {
+                        this.checkValidationField('c19bmcvroutrecfac', validation);
+                    }
+                }
+                if (this.state.surveyType === '01') {
+                    this.checkValidationField('c20mcvcampaign', validation);
+                }
+                if (params.person.AgeGroup === 'A') {
+                    this.checkValidationField('c21immcard', validation);
+                    if (this.state.c21immcard === '01') {
+                        const cardAvailableVal = ['c22mcvdoc1', 'c24abcgdoc', 'c24bhepatitis', 'c24bopv0doc', 'c24fopv1doc', 'c24gopv2doc',
+                            'c24hopv3doc', 'c24gipvdoc', 'c24cpenta1doc', 'c24dpenta2doc', 'c24epenta3doc',
+                            'c24krota1', 'c24lrota2', 'c24mrota3', 'c24nje1', 'c24oje2'];
+                        _.forEach(cardAvailableVal, (fieldKey) => {
+                            this.checkValidationField(fieldKey, validation);
+                        });
+                        if (this.state.c22mcvdoc1 === '01' || this.state.c22mcvdoc1 === '02') {
+                            this.checkValidationField('c22cmcvdoc1rub', validation);
+                        }
+                        this.checkValidationField('c23amcvdoc2', validation);
+                        if (this.state.c23amcvdoc2 === '01' || this.state.c23amcvdoc2 === '02') {
+                            this.checkValidationField('c23cmcvdoc2rub', validation);
+                        }
+                    } else {
+                        const cardNotAvailableVal = ['c25abcg', 'c25bhepatitis', 'c25cpolio', 'c25dopv', 'c29aipv', 'c30apenta',
+                            'c31arota', 'c32aje'];
+                        _.forEach(cardNotAvailableVal, (fieldKey) => {
+                            this.checkValidationField(fieldKey, validation);
+                        });
+                    }
+                }
+                if (this.state.cs1scollect === '01') {
+                    const capillarSampleCollected = ['cs1scollecthow', 'cs5squal', 'cs6sproblem'];
+                    _.forEach(capillarSampleCollected, (fieldKey) => {
+                        this.checkValidationField(fieldKey, validation);
+                    });
+                } else if (this.state.cs1scollect === '02') {
+                    this.checkValidationField('cs1ascollectno', validation);
+                } else {
+                    validation.cs1scollect = false;
+                }
+                if (this.state.cs7dcollect === '01') {
+                    const capillarSampleCollected = ['cs11dspots', 'cs12adqual1', 'cs12adqual2',
+                        'cs12adqual3', 'cs12adqual4', 'cs12adqual5', 'cs13dproblem'];
+                    _.forEach(capillarSampleCollected, (fieldKey) => {
+                        this.checkValidationField(fieldKey, validation);
+                    });
+                } else if (this.state.cs7dcollect === '02') {
+                    this.checkValidationField('cs7adcollectno', validation);
+                } else {
+                    validation.cs7dcollect = false;
+                }
+            }
+        } else {
+            _.forEach(_.keys(this.state), (fieldKey) => {
+                validation[fieldKey] = true;
+            });
+        }
+        console.log('validation', validation);
+        return validation;
+    }
+
     onPress() {
         const { params } = this.props.navigation.state;
         const { navigate } = this.props.navigation;
-        if (this.isFormValid()) {
+
+        this.validate({
+            c2name: { required: true }
+        });
+        if (this.state.c3areason === '01') {
+            this.validate({
+                c26intcomments: { required: true }
+            });
+
+            if (this.state.c3dob === '01') {
+                this.validate({
+                    c9adobdt: { required: true }
+                });
+            }
+            if (this.state.c3dob === '02') {
+                this.validate({
+                    c10age: { required: true }
+                });
+            }
+            if (this.state.eligible) {
+                if (this.state.c3areason === '01') {
+                    this.validate({
+                        c4resname: { required: true }
+                    });
+                }
+                if (this.state.c6amomalive === '01') {
+                    this.validate({
+                        c6bmomage: { required: true }
+                    });
+                }
+                if (this.state.c15campaignlocat === '99') {
+                    this.validate({
+                        c15campaignlocatsp: { required: true }
+                    });
+                }
+                if (this.state.c19bmcvroutrecfac === '01') {
+                    this.validate({
+                        c15campaignlocatsp: { required: true }
+                    });
+                }
+                if (this.state.c22mcvdoc1 === '01') {
+                    this.validate({
+                        c22bmcvday1: { required: true }
+                    });
+                }
+                if (this.state.c23amcvdoc2 === '01') {
+                    this.validate({
+                        c23bmcvday1: { required: true }
+                    });
+                }
+                if (this.state.c24abcgdoc === '01') {
+                    this.validate({
+                        c24abcgday: { required: true }
+                    });
+                }
+                if (this.state.c24bhepatitis === '01') {
+                    this.validate({
+                        c24bhepatitisday: { required: true }
+                    });
+                }
+                if (this.state.c24bopv0doc === '01') {
+                    this.validate({
+                        c24bopv0day: { required: true }
+                    });
+                }
+                if (this.state.c24fopv1doc === '01') {
+                    this.validate({
+                        c24fopvday1: { required: true }
+                    });
+                }
+                if (this.state.c24gopv2doc === '01') {
+                    this.validate({
+                        c24gopvday2: { required: true }
+                    });
+                }
+                if (this.state.c24gipvdoc === '01') {
+                    this.validate({
+                        c24gipvdocday: { required: true }
+                    });
+                }
+                if (this.state.c24cpenta1doc === '01') {
+                    this.validate({
+                        c24cpentaday1: { required: true }
+                    });
+                }
+                if (this.state.c24dpenta2doc === '01') {
+                    this.validate({
+                        c24dpentaday1: { required: true }
+                    });
+                }
+                if (this.state.c24epenta3doc === '01') {
+                    this.validate({
+                        c24epentaday3: { required: true }
+                    });
+                }
+                if (this.state.c24krota1 === '01') {
+                    this.validate({
+                        c24krota1day: { required: true }
+                    });
+                }
+                if (this.state.c24lrota2 === '01') {
+                    this.validate({
+                        c24lrot2day: { required: true }
+                    });
+                }
+                if (this.state.c24mrota3 === '01') {
+                    this.validate({
+                        c24mrota3day: { required: true }
+                    });
+                }
+                if (this.state.c24nje1 === '01') {
+                    this.validate({
+                        c24nje1day: { required: true }
+                    });
+                }
+                if (this.state.c24oje2 === '01') {
+                    this.validate({
+                        c24oje2day: { required: true }
+                    });
+                }
+                if (this.state.c25dopv === '01') {
+                    this.validate({
+                        c25dopvdose: { required: true }
+                    });
+                }
+                if (this.state.c30apenta === '01') {
+                    this.validate({
+                        c30apentadose: { required: true }
+                    });
+                }
+                if (this.state.c31arota === '01') {
+                    this.validate({
+                        c31arotadose: { required: true }
+                    });
+                }
+                if (this.state.c32aje === '01') {
+                    this.validate({
+                        c32ajedose: { required: true }
+                    });
+                }
+
+                if (this.state.cs1scollect === '01') {
+                    if (this.state.cs6sproblem === '99') {
+                        this.validate({
+                            cs6asprobsp: { required: true }
+                        });
+                    }
+                    this.validate({
+                        cs15intcomments: { required: true }
+                    });
+                }
+                if (this.state.cs1scollect === '02') {
+                    if (this.state.cs1ascollectno === '99') {
+                        this.validate({
+                            cs1bscollectoth: { required: true }
+                        });
+                    }
+                    this.validate({
+                        cs15intcomments: { required: true }
+                    });
+                }
+                if (this.state.cs7dcollect === '02') {
+                    if (this.state.cs7adcollectno === '99') {
+                        this.validate({
+                            cs7bdcollectoth: { required: true }
+                        });
+                    }
+                }
+                if (this.state.cs7dcollect === '01') {
+                    if (this.state.cs13dproblem === '99') {
+                        this.validate({
+                            cs13adprobsp: { required: true }
+                        });
+                    }
+                }
+            }
+        }
+
+        const RadioValidations = this.validateRadioOptions();
+        console.log('RadioValidations', RadioValidations);
+
+        console.log('this.isFormValid()', this.isFormValid());
+        console.log('error', this.getErrorMessages());
+        console.log('RadioValidations.includes(false)', _.includes(_.values(RadioValidations), false));
+        if (this.isFormValid() && !(_.includes(_.values(RadioValidations), false))) {
             this.setState({
                 h1hhid: params.HouseholdID,
                 updatedTime: moment().format('MM-DD-YYY h:mm:ss a')
@@ -511,14 +806,30 @@ export default class ChildCampaignSurvey extends ValidationComponent {
                 realm.write(() => {
                     realm.create('SurveyInformation', { surveyID, surveyData: JSON.stringify(this.state), status: 'saved' }, true);
                 });
-                this.removeBloodSampleCount(params.person.AgeGroup);
+                if (this.state.cs1scollect === '01' || this.state.cs7dcollect === '01') {
+                    this.addBloodSampleCount(params.person.AgeGroup);
+                } else {
+                    this.removeBloodSampleCount(params.person.AgeGroup);
+                }
+                ToastAndroid.show(
+                    'Child campaign information updated',
+                    ToastAndroid.SHORT,
+                    ToastAndroid.CENTER
+                );
                 navigate('CompletedSurveyDetails');
             } else {
                 surveyID = realm.objects('SurveyInformation').filtered('status = "open" && Sno = $0 && AgeGroup = $1 && HouseholdID=$2', params.person.Sno, params.person.AgeGroup, params.HouseholdID)[0].surveyID;
                 realm.write(() => {
                     realm.create('SurveyInformation', { surveyID, surveyData: JSON.stringify(this.state), status: 'inprogress' }, true);
                 });
-                this.addBloodSampleCount(params.person.AgeGroup);
+                if (this.state.cs1scollect === '01' || this.state.cs7dcollect === '01') {
+                    this.addBloodSampleCount(params.person.AgeGroup);
+                }
+                ToastAndroid.show(
+                    'Child campaign information saved',
+                    ToastAndroid.SHORT,
+                    ToastAndroid.CENTER
+                );
                 navigate('RandomListScreen');
             }
         } else {
@@ -540,18 +851,14 @@ export default class ChildCampaignSurvey extends ValidationComponent {
                     .filtered('Submitted = "active" && clusterID = $0', clusterID).length > 0) {
                     const bloodsampleid = realm.objects('BloodSample').filtered('Submitted = "active" && clusterID = $0', clusterID)[0].id;
                     const bloodSampleData = realm.objects('BloodSample').filtered('clusterID=$0', clusterID)[0].TypeA;
-                    if (this.state.cs1scollect === '01' || this.state.cs7dcollect === '01') {
-                        realm.create('BloodSample', { id: bloodsampleid, TypeA: bloodSampleData + 1 }, true);
-                    }
+                    realm.create('BloodSample', { id: bloodsampleid, TypeA: bloodSampleData + 1 }, true);
                 } else {
                     realm.create('BloodSample', { id: new Date().getTime(), clusterID, TypeA: 1 });
                 }
             } else if (realm.objects('BloodSample').filtered('Submitted = "active" && clusterID = $0', clusterID).length > 0) {
                 const bloodSampleData = realm.objects('BloodSample').filtered('clusterID=$0', clusterID)[0].TypeB;
                 const bloodsampleid = realm.objects('BloodSample').filtered('Submitted = "active" && clusterID = $0', clusterID)[0].id;
-                if (this.state.cs1scollect === '01' || this.state.cs7dcollect === '01') {
-                    realm.create('BloodSample', { id: bloodsampleid, TypeB: bloodSampleData + 1 }, true);
-                }
+                realm.create('BloodSample', { id: bloodsampleid, TypeB: bloodSampleData + 1 }, true);
             } else {
                 realm.create('BloodSample', { id: new Date().getTime(), clusterID, TypeB: 1 });
             }
@@ -617,7 +924,7 @@ export default class ChildCampaignSurvey extends ValidationComponent {
                         formHorizontal={false}
                         labelHorizontal
                         radio_props={this.optionListBoolean}
-                        initial={this.state.c3dobindex ? this.state.c3dobindex : -1}
+                        initial={this.state.c3dobindex === 0 ? 0 : (this.state.c3dobindex ? this.state.c3dobindex : -1)}
                         onPress={(value, index) => {
                             this.setState({ c3dob: value, c9adobdt: '', c10age: '', c3dobindex: index, eligible: true });
                         }}
@@ -680,7 +987,7 @@ export default class ChildCampaignSurvey extends ValidationComponent {
                                 formHorizontal={false}
                                 labelHorizontal
                                 radio_props={this.optionListConsent}
-                                initial={this.state.c3areasonindex ? this.state.c3areasonindex : -1}
+                                initial={this.state.c3areasonindex === 0 ? 0 : (this.state.c3areasonindex ? this.state.c3areasonindex : -1)}
                                 onPress={(value, index) => { this.setState({ c3areason: value, c3areasonindex: index }); console.log(this.state); }}
                             />
                         </View >
@@ -741,7 +1048,7 @@ export default class ChildCampaignSurvey extends ValidationComponent {
                                                 formHorizontal={false}
                                                 labelHorizontal
                                                 radio_props={this.educationStatus}
-                                                initial={this.state.c7momeducationindex ? this.state.c7momeducationindex : -1}
+                                                initial={this.state.c7momeducationindex === 0 ? 0 : (this.state.c7momeducationindex ? this.state.c7momeducationindex : -1)}
                                                 onPress={(value, index) => { this.setState({ c7momeducation: value, c7momeducationindex: index }); console.log(this.state); }}
                                             />
                                         </View>
@@ -755,7 +1062,7 @@ export default class ChildCampaignSurvey extends ValidationComponent {
                                                 formHorizontal={false}
                                                 labelHorizontal
                                                 radio_props={this.ocuupationStatus}
-                                                initial={this.state.c8momoccupationindex ? this.state.c8momoccupationindex : -1}
+                                                initial={this.state.c8momoccupationindex === 0 ? 0 : (this.state.c8momoccupationindex ? this.state.c8momoccupationindex : -1)}
                                                 onPress={(value, index) => { this.setState({ c8momoccupation: value, c8momoccupationindex: index }); console.log(this.state); }}
                                             />
                                         </View>
@@ -776,7 +1083,7 @@ export default class ChildCampaignSurvey extends ValidationComponent {
                                                 formHorizontal={false}
                                                 labelHorizontal
                                                 radio_props={this.optionList}
-                                                initial={this.state.c11campaignliveindex ? this.state.c11campaignliveindex : -1}
+                                                initial={this.state.c11campaignliveindex === 0 ? 0 : (this.state.c11campaignliveindex ? this.state.c11campaignliveindex : -1)}
                                                 onPress={(value, index) => { this.setState({ c11campaignlive: value, c11campaignliveindex: index }); console.log(this.state); }}
                                             />
                                         </View >
@@ -791,6 +1098,7 @@ export default class ChildCampaignSurvey extends ValidationComponent {
                                                 labelHorizontal
                                                 radio_props={this.optionList}
                                                 initial={this.state.c12campaignawareindex ? this.state.c12campaignawareindex : -1}
+                                                initial={this.state.c12campaignawareindex === 0 ? 0 : (this.state.c12campaignawareindex ? this.state.c12campaignawareindex : -1)}
                                                 onPress={(value, index) => { this.setState({ c12campaignaware: value, c12campaignawareindex: index }); console.log(this.state); }}
                                             />
                                         </View >
@@ -804,7 +1112,7 @@ export default class ChildCampaignSurvey extends ValidationComponent {
                                                 formHorizontal={false}
                                                 labelHorizontal
                                                 radio_props={this.champaignInfoStatus}
-                                                initial={this.state.c13campaignhear1index ? this.state.c13campaignhear1index : -1}
+                                                initial={this.state.c13campaignhear1indexx === 0 ? 0 : (this.state.c13campaignhear1index ? this.state.c13campaignhear1index : -1)}
                                                 onPress={(value, index) => { this.setState({ c13campaignhear1: value, c13campaignhear1index: index }); console.log(this.state); }}
                                             />
                                         </View >
@@ -818,7 +1126,7 @@ export default class ChildCampaignSurvey extends ValidationComponent {
                                                 formHorizontal={false}
                                                 labelHorizontal
                                                 radio_props={this.champaignInfoStatus}
-                                                initial={this.state.c13campaignhear2index ? this.state.c13campaignhear2index : -1}
+                                                initial={this.state.c13campaignhear2index === 0 ? 0 : (this.state.c13campaignhear2index ? this.state.c13campaignhear2index : -1)}
                                                 onPress={(value, index) => { this.setState({ c13campaignhear2: value, c13campaignhear2index: index }); console.log(this.state); }}
                                             />
                                         </View >
@@ -832,7 +1140,7 @@ export default class ChildCampaignSurvey extends ValidationComponent {
                                                 formHorizontal={false}
                                                 labelHorizontal
                                                 radio_props={this.champaignInfoStatus}
-                                                initial={this.state.c13campaignhear3index ? this.state.c13campaignhear3index : -1}
+                                                initial={this.state.c13campaignhear2index === 0 ? 0 : (this.state.c13campaignhear2index ? this.state.c13campaignhear2index : -1)}
                                                 onPress={(value, index) => { this.setState({ c13campaignhear3: value, c13campaignhear3index: index }); console.log(this.state); }}
                                             />
                                         </View >
@@ -846,7 +1154,7 @@ export default class ChildCampaignSurvey extends ValidationComponent {
                                                 formHorizontal={false}
                                                 labelHorizontal
                                                 radio_props={this.schoolStatus}
-                                                initial={this.state.c13aschoolindex ? this.state.c13aschoolindex : -1}
+                                                initial={this.state.c13aschoolindex === 0 ? 0 : (this.state.c13aschoolindex ? this.state.c13aschoolindex : -1)}
                                                 onPress={(value, index) => { this.setState({ c13aschool: value, c13aschoolindex: index }); console.log(this.state); }}
                                             />
                                         </View >
@@ -860,7 +1168,7 @@ export default class ChildCampaignSurvey extends ValidationComponent {
                                                 formHorizontal={false}
                                                 labelHorizontal
                                                 radio_props={this.optionList}
-                                                initial={this.state.c14campaignmrrecindex ? this.state.c14campaignmrrecindex : -1}
+                                                initial={this.state.c14campaignmrrecindex === 0 ? 0 : (this.state.c14campaignmrrecindex ? this.state.c14campaignmrrecindex : -1)}
                                                 onPress={(value, index) => { this.setState({ c14campaignmrrec: value, c14campaignmrrecindex: index }); console.log(this.state); }}
                                             />
                                         </View >
@@ -874,17 +1182,19 @@ export default class ChildCampaignSurvey extends ValidationComponent {
                                                 formHorizontal={false}
                                                 labelHorizontal
                                                 radio_props={this.receiveVaccineStatus}
-                                                initial={this.state.c15campaignlocatindex ? this.state.c15campaignlocatindex : -1}
+                                                initial={this.state.c15campaignlocatindex === 0 ? 0 : (this.state.c15campaignlocatindex ? this.state.c15campaignlocatindex : -1)}
                                                 onPress={(value, index) => { this.setState({ c15campaignlocat: value, c15campaignlocatindex: index }); console.log(this.state); }}
                                             />
                                         </View >
-                                        <View style={{ marginBottom: 20 }}>
-                                            <Text style={styles.headingLetter}>Others, Specify?</Text>
-                                            <FormInput
-                                                value={this.state.c15campaignlocatsp}
-                                                onChangeText={(c15campaignlocatsp) => this.setState({ c15campaignlocatsp })}
-                                            />
-                                        </View>
+                                        {this.state.c15campaignlocat === '99' &&
+                                            <View style={{ marginBottom: 20 }}>
+                                                <Text style={styles.headingLetter}>Others, Specify?</Text>
+                                                <FormInput
+                                                    value={this.state.c15campaignlocatsp}
+                                                    onChangeText={(c15campaignlocatsp) => this.setState({ c15campaignlocatsp })}
+                                                />
+                                            </View>
+                                        }
                                         <View style={{ marginBottom: 20, borderBottomWidth: 1, borderBottomColor: '#000', paddingBottom: 10 }}>
                                             <Text style={styles.headingLetter}>16. Was the vaccination card provided to the family during the campaign? </Text>
                                             <RadioForm
@@ -895,7 +1205,7 @@ export default class ChildCampaignSurvey extends ValidationComponent {
                                                 formHorizontal={false}
                                                 labelHorizontal
                                                 radio_props={this.vaccineCardStatus}
-                                                initial={this.state.c16campaigncardindex ? this.state.c16campaigncardindex : -1}
+                                                initial={this.state.c16campaigncardindex === 0 ? 0 : (this.state.c16campaigncardindex ? this.state.c16campaigncardindex : -1)}
                                                 onPress={(value, index) => { this.setState({ c16campaigncard: value, c16campaigncardindex: index }); console.log(this.state); }}
                                             />
                                         </View >
@@ -909,7 +1219,7 @@ export default class ChildCampaignSurvey extends ValidationComponent {
                                                 formHorizontal={false}
                                                 labelHorizontal
                                                 radio_props={this.optionListBoolean}
-                                                initial={this.state.c17campaigndoseindex ? this.state.c17campaigndoseindex : -1}
+                                                initial={this.state.c17campaigndoseindex === 0 ? 0 : (this.state.c17campaigndoseindex ? this.state.c17campaigndoseindex : -1)}
                                                 onPress={(value, index) => { this.setState({ c17campaigndose: value, c17campaigndoseindex: index }); console.log(this.state); }}
                                             />
                                         </View >
@@ -925,7 +1235,7 @@ export default class ChildCampaignSurvey extends ValidationComponent {
                                                         formHorizontal={false}
                                                         labelHorizontal
                                                         radio_props={this.notReceiveVaccineStatus}
-                                                        initial={this.state.c18reason1index ? this.state.c18reason1index : -1}
+                                                        initial={this.state.c18reason1index === 0 ? 0 : (this.state.c18reason1index ? this.state.c18reason1index : -1)}
                                                         onPress={(value, index) => { this.setState({ c18reason1: value, c18reason1index: index }); console.log(this.state); }}
                                                     />
                                                 </View >
@@ -939,7 +1249,7 @@ export default class ChildCampaignSurvey extends ValidationComponent {
                                                         formHorizontal={false}
                                                         labelHorizontal
                                                         radio_props={this.notReceiveVaccineStatus}
-                                                        initial={this.state.c18reason2index ? this.state.c18reason2index : -1}
+                                                        initial={this.state.c18reason2index === 0 ? 0 : (this.state.c18reason2index ? this.state.c18reason2index : -1)}
                                                         onPress={(value, index) => { this.setState({ c18reason2: value, c18reason2index: index }); console.log(this.state); }}
                                                     />
                                                 </View >
@@ -953,7 +1263,7 @@ export default class ChildCampaignSurvey extends ValidationComponent {
                                                         formHorizontal={false}
                                                         labelHorizontal
                                                         radio_props={this.notReceiveVaccineStatus}
-                                                        initial={this.state.c18reason3index ? this.state.c18reason3index : -1}
+                                                        initial={this.state.c18reason3index === 0 ? 0 : (this.state.c18reason3index ? this.state.c18reason3index : -1)}
                                                         onPress={(value, index) => { this.setState({ c18reason3: value, c18reason3index: index }); console.log(this.state); }}
                                                     />
                                                 </View >
@@ -967,7 +1277,7 @@ export default class ChildCampaignSurvey extends ValidationComponent {
                                                         formHorizontal={false}
                                                         labelHorizontal
                                                         radio_props={this.notReceiveVaccineStatus}
-                                                        initial={this.state.c18reason4index ? this.state.c18reason4index : -1}
+                                                        initial={this.state.c18reason4index === 0 ? 0 : (this.state.c18reason4index ? this.state.c18reason4index : -1)}
                                                         onPress={(value, index) => { this.setState({ c18reason4: value, c18reason4index: index }); console.log(this.state); }}
                                                     />
                                                 </View >
@@ -987,7 +1297,7 @@ export default class ChildCampaignSurvey extends ValidationComponent {
                                                 formHorizontal={false}
                                                 labelHorizontal
                                                 radio_props={this.optionList}
-                                                initial={this.state.c19mcvroutrecindex ? this.state.c19mcvroutrecindex : -1}
+                                                initial={this.state.c19mcvroutrecindex === 0 ? 0 : (this.state.c19mcvroutrecindexx ? this.state.c19mcvroutrecindex : -1)}
                                                 onPress={(value, index) => { this.setState({ c19mcvroutrec: value, c19mcvroutrecindex: index }); console.log(this.state); }}
                                             />
                                         </View >
@@ -1011,7 +1321,7 @@ export default class ChildCampaignSurvey extends ValidationComponent {
                                                         formHorizontal={false}
                                                         labelHorizontal
                                                         radio_props={this.facilityStatus}
-                                                        initial={this.state.c19bmcvroutrecfacindex ? this.state.c19bmcvroutrecfacindex : -1}
+                                                        initial={this.state.c19bmcvroutrecfacindex === 0 ? 0 : (this.state.c19bmcvroutrecfacindex ? this.state.c19bmcvroutrecfacindex : -1)}
                                                         onPress={(value, index) => { this.setState({ c19bmcvroutrecfac: value, c19bmcvroutrecfacindex: index }); console.log(this.state); }}
                                                     />
                                                 </View >
@@ -1031,7 +1341,7 @@ export default class ChildCampaignSurvey extends ValidationComponent {
                                                 formHorizontal={false}
                                                 labelHorizontal
                                                 radio_props={this.optionList}
-                                                initial={this.state.c20mcvcampaignindex ? this.state.c20mcvcampaignindex : -1}
+                                                initial={this.state.c20mcvcampaignindex === 0 ? 0 : (this.state.c20mcvcampaignindex ? this.state.c20mcvcampaignindex : -1)}
                                                 onPress={(value, index) => { this.setState({ c20mcvcampaign: value, c20mcvcampaignindex: index }); console.log(this.state); }}
                                             />
                                         </View >
@@ -1070,7 +1380,7 @@ export default class ChildCampaignSurvey extends ValidationComponent {
                                                 formHorizontal={false}
                                                 labelHorizontal
                                                 radio_props={this.immunineCardStatus}
-                                                initial={this.state.c21immcardindex ? this.state.c21immcardindex : -1}
+                                                initial={this.state.c21immcardindex === 0 ? 0 : (this.state.c21immcardindex ? this.state.c21immcardindex : -1)}
                                                 onPress={(value, index) => { this.setState({ c21immcard: value, c21immcardindex: index }); console.log(this.state); }}
                                             />
                                         </View >
@@ -1092,7 +1402,7 @@ export default class ChildCampaignSurvey extends ValidationComponent {
                                                         formHorizontal={false}
                                                         labelHorizontal
                                                         radio_props={this.vaccineByCardStatus}
-                                                        initial={this.state.c22mcvdoc1index ? this.state.c22mcvdoc1index : -1}
+                                                        initial={this.state.c22mcvdoc1index === 0 ? 0 : (this.state.c22mcvdoc1index ? this.state.c22mcvdoc1index : -1)}
                                                         onPress={(value, index) => { this.setState({ c22mcvdoc1: value, c22mcvdoc1index: index }); console.log(this.state); }}
                                                     />
                                                 </View >
@@ -1119,7 +1429,7 @@ export default class ChildCampaignSurvey extends ValidationComponent {
                                                             formHorizontal={false}
                                                             labelHorizontal
                                                             radio_props={this.optionListBoolean}
-                                                            initial={this.state.c22cmcvdoc1rubindex ? this.state.c22cmcvdoc1rubindex : -1}
+                                                            initial={this.state.c22cmcvdoc1rubindex === 0 ? 0 : (this.state.c22cmcvdoc1rubindex ? this.state.c22cmcvdoc1rubindex : -1)}
                                                             onPress={(value, index) => { this.setState({ c22cmcvdoc1rub: value, c22cmcvdoc1rubindex: index }); console.log(this.state); }}
                                                         />
                                                     </View >
@@ -1135,7 +1445,7 @@ export default class ChildCampaignSurvey extends ValidationComponent {
                                                         formHorizontal={false}
                                                         labelHorizontal
                                                         radio_props={this.vaccineByCardStatusNA}
-                                                        initial={this.state.c23amcvdoc2index ? this.state.c23amcvdoc2index : -1}
+                                                        initial={this.state.c23amcvdoc2index === 0 ? 0 : (this.state.c23amcvdoc2index ? this.state.c23amcvdoc2index : -1)}
                                                         onPress={(value, index) => { this.setState({ c23amcvdoc2: value, c23amcvdoc2index: index }); console.log(this.state); }}
                                                     />
                                                 </View >
@@ -1162,7 +1472,7 @@ export default class ChildCampaignSurvey extends ValidationComponent {
                                                             formHorizontal={false}
                                                             labelHorizontal
                                                             radio_props={this.optionListBoolean}
-                                                            initial={this.state.c23cmcvdoc2rubindex ? this.state.c23cmcvdoc2rubindex : -1}
+                                                            initial={this.state.c23cmcvdoc2rubindex === 0 ? 0 : (this.state.c23cmcvdoc2rubindex ? this.state.c23cmcvdoc2rubindex : -1)}
                                                             onPress={(value, index) => { this.setState({ c23cmcvdoc2rub: value, c23cmcvdoc2rubindex: index }); console.log(this.state); }}
                                                         />
                                                     </View >
@@ -1177,7 +1487,7 @@ export default class ChildCampaignSurvey extends ValidationComponent {
                                                         formHorizontal={false}
                                                         labelHorizontal
                                                         radio_props={this.vaccineByCardStatus}
-                                                        initial={this.state.c24abcgdocindex ? this.state.c24abcgdocindex : -1}
+                                                        initial={this.state.c24abcgdocindex === 0 ? 0 : (this.state.c24abcgdocindex ? this.state.c24abcgdocindex : -1)}
                                                         onPress={(value, index) => { this.setState({ c24abcgdoc: value, c24abcgdocindex: index }); console.log(this.state); }}
                                                     />
                                                 </View >
@@ -1203,7 +1513,7 @@ export default class ChildCampaignSurvey extends ValidationComponent {
                                                         formHorizontal={false}
                                                         labelHorizontal
                                                         radio_props={this.vaccineByCardStatus}
-                                                        initial={this.state.c24bhepatitisindex ? this.state.c24bhepatitisindex : -1}
+                                                        initial={this.state.c24bhepatitisindex === 0 ? 0 : (this.state.c24bhepatitisindex ? this.state.c24bhepatitisindex : -1)}
                                                         onPress={(value, index) => { this.setState({ c24bhepatitis: value, c24bhepatitisindex: index }); console.log(this.state); }}
                                                     />
                                                 </View >
@@ -1232,7 +1542,7 @@ export default class ChildCampaignSurvey extends ValidationComponent {
                                                         formHorizontal={false}
                                                         labelHorizontal
                                                         radio_props={this.vaccineByCardStatus}
-                                                        initial={this.state.c24bopv0docindex ? this.state.c24bopv0docindex : -1}
+                                                        initial={this.state.c24bopv0docindex === 0 ? 0 : (this.state.c24bopv0docindex ? this.state.c24bopv0docindex : -1)}
                                                         onPress={(value, index) => { this.setState({ c24bopv0doc: value, c24bopv0docindex: index }); console.log(this.state); }}
                                                     />
                                                 </View >
@@ -1258,7 +1568,7 @@ export default class ChildCampaignSurvey extends ValidationComponent {
                                                         formHorizontal={false}
                                                         labelHorizontal
                                                         radio_props={this.vaccineByCardStatus}
-                                                        initial={this.state.c24fopv1docindex ? this.state.c24fopv1docindex : -1}
+                                                        initial={this.state.c24fopv1docindex === 0 ? 0 : (this.state.c24fopv1docindex ? this.state.c24fopv1docindex : -1)}
                                                         onPress={(value, index) => { this.setState({ c24fopv1doc: value, c24fopv1docindex: index }); console.log(this.state); }}
                                                     />
                                                 </View >
@@ -1284,7 +1594,7 @@ export default class ChildCampaignSurvey extends ValidationComponent {
                                                         formHorizontal={false}
                                                         labelHorizontal
                                                         radio_props={this.vaccineByCardStatus}
-                                                        initial={this.state.c24gopv2docindex ? this.state.c24gopv2docindex : -1}
+                                                        initial={this.state.c24gopv2docindex === 0 ? 0 : (this.state.c24gopv2docindex ? this.state.c24gopv2docindex : -1)}
                                                         onPress={(value, index) => { this.setState({ c24gopv2doc: value, c24gopv2docindex: index }); console.log(this.state); }}
                                                     />
                                                 </View >
@@ -1310,7 +1620,7 @@ export default class ChildCampaignSurvey extends ValidationComponent {
                                                         formHorizontal={false}
                                                         labelHorizontal
                                                         radio_props={this.vaccineByCardStatus}
-                                                        initial={this.state.c24hopv3docindex ? this.state.c24hopv3docindex : -1}
+                                                        initial={this.state.c24hopv3docindex === 0 ? 0 : (this.state.c24hopv3docindex ? this.state.c24hopv3docindex : -1)}
                                                         onPress={(value, index) => { this.setState({ c24hopv3doc: value, c24hopv3docindex: index }); console.log(this.state); }}
                                                     />
                                                 </View >
@@ -1336,7 +1646,7 @@ export default class ChildCampaignSurvey extends ValidationComponent {
                                                         formHorizontal={false}
                                                         labelHorizontal
                                                         radio_props={this.vaccineByCardStatus}
-                                                        initial={this.state.c24gipvdocindex ? this.state.c24gipvdocindex : -1}
+                                                        initial={this.state.c24gipvdocindex === 0 ? 0 : (this.state.c24gipvdocindex ? this.state.c24gipvdocindex : -1)}
                                                         onPress={(value, index) => { this.setState({ c24gipvdoc: value, c24gipvdocindex: index }); console.log(this.state); }}
                                                     />
                                                 </View >
@@ -1365,7 +1675,7 @@ export default class ChildCampaignSurvey extends ValidationComponent {
                                                         formHorizontal={false}
                                                         labelHorizontal
                                                         radio_props={this.vaccineByCardStatus}
-                                                        initial={this.state.c24cpenta1docindex ? this.state.c24cpenta1docindex : -1}
+                                                        initial={this.state.c24cpenta1docindex === 0 ? 0 : (this.state.c24cpenta1docindex ? this.state.c24cpenta1docindex : -1)}
                                                         onPress={(value, index) => { this.setState({ c24cpenta1doc: value, c24cpenta1docindex: index }); console.log(this.state); }}
                                                     />
                                                 </View >
@@ -1392,7 +1702,7 @@ export default class ChildCampaignSurvey extends ValidationComponent {
                                                         formHorizontal={false}
                                                         labelHorizontal
                                                         radio_props={this.vaccineByCardStatus}
-                                                        initial={this.state.c24dpenta2docindex ? this.state.c24dpenta2docindex : -1}
+                                                        initial={this.state.c24dpenta2docindex === 0 ? 0 : (this.state.c24dpenta2docindex ? this.state.c24dpenta2docindex : -1)}
                                                         onPress={(value, index) => { this.setState({ c24dpenta2doc: value, c24dpenta2docindex: index }); console.log(this.state); }}
                                                     />
                                                 </View >
@@ -1418,7 +1728,7 @@ export default class ChildCampaignSurvey extends ValidationComponent {
                                                         formHorizontal={false}
                                                         labelHorizontal
                                                         radio_props={this.vaccineByCardStatus}
-                                                        initial={this.state.c24epenta3docindex ? this.state.c24epenta3docindex : -1}
+                                                        initial={this.state.c24epenta3docindex === 0 ? 0 : (this.state.c24epenta3docindex ? this.state.c24epenta3docindex : -1)}
                                                         onPress={(value, index) => { this.setState({ c24epenta3doc: value, c24epenta3docindex: index }); console.log(this.state); }}
                                                     />
                                                 </View >
@@ -1447,7 +1757,7 @@ export default class ChildCampaignSurvey extends ValidationComponent {
                                                         formHorizontal={false}
                                                         labelHorizontal
                                                         radio_props={this.vaccineByCardStatus}
-                                                        initial={this.state.c24krota1index ? this.state.c24krota1index : -1}
+                                                        initial={this.state.c24krota1index === 0 ? 0 : (this.state.c24krota1index ? this.state.c24krota1index : -1)}
                                                         onPress={(value, index) => { this.setState({ c24krota1: value, c24krota1index: index }); console.log(this.state); }}
                                                     />
                                                 </View >
@@ -1473,7 +1783,7 @@ export default class ChildCampaignSurvey extends ValidationComponent {
                                                         formHorizontal={false}
                                                         labelHorizontal
                                                         radio_props={this.vaccineByCardStatus}
-                                                        initial={this.state.c24lrota2index ? this.state.c24lrota2index : -1}
+                                                        initial={this.state.c24lrota2index === 0 ? 0 : (this.state.c24lrota2index ? this.state.c24lrota2index : -1)}
                                                         onPress={(value, index) => { this.setState({ c24lrota2: value, c24lrota2index: index }); console.log(this.state); }}
                                                     />
                                                 </View >
@@ -1499,7 +1809,7 @@ export default class ChildCampaignSurvey extends ValidationComponent {
                                                         formHorizontal={false}
                                                         labelHorizontal
                                                         radio_props={this.vaccineByCardStatus}
-                                                        initial={this.state.c24mrota3index ? this.state.c24mrota3index : -1}
+                                                        initial={this.state.c24mrota3index === 0 ? 0 : (this.state.c24mrota3index ? this.state.c24mrota3index : -1)}
                                                         onPress={(value, index) => { this.setState({ c24mrota3: value, c24mrota3index: index }); console.log(this.state); }}
                                                     />
                                                 </View >
@@ -1528,7 +1838,7 @@ export default class ChildCampaignSurvey extends ValidationComponent {
                                                         formHorizontal={false}
                                                         labelHorizontal
                                                         radio_props={this.vaccineByCardStatusNA}
-                                                        initial={this.state.c24nje1index ? this.state.c24nje1index : -1}
+                                                        initial={this.state.c24nje1index === 0 ? 0 : (this.state.c24nje1index ? this.state.c24nje1index : -1)}
                                                         onPress={(value, index) => { this.setState({ c24nje1: value, c24nje1index: index }); console.log(this.state); }}
                                                     />
                                                 </View >
@@ -1554,7 +1864,7 @@ export default class ChildCampaignSurvey extends ValidationComponent {
                                                         formHorizontal={false}
                                                         labelHorizontal
                                                         radio_props={this.vaccineByCardStatusNA}
-                                                        initial={this.state.c24oje2index ? this.state.c24oje2index : -1}
+                                                        initial={this.state.c24oje2index === 0 ? 0 : (this.state.c24oje2index ? this.state.c24oje2index : -1)}
                                                         onPress={(value, index) => { this.setState({ c24oje2: value, c24oje2index: index }); console.log(this.state); }}
                                                     />
                                                 </View >
@@ -1584,7 +1894,7 @@ export default class ChildCampaignSurvey extends ValidationComponent {
                                                         formHorizontal={false}
                                                         labelHorizontal
                                                         radio_props={this.optionList}
-                                                        initial={this.state.c25abcgindex ? this.state.c25abcgindex : -1}
+                                                        initial={this.state.c25abcgindex === 0 ? 0 : (this.state.c25abcgindex ? this.state.c25abcgindex : -1)}
                                                         onPress={(value, index) => { this.setState({ c25abcg: value, c25abcgindex: index }); console.log(this.state); }}
                                                     />
                                                 </View >
@@ -1598,7 +1908,7 @@ export default class ChildCampaignSurvey extends ValidationComponent {
                                                         formHorizontal={false}
                                                         labelHorizontal
                                                         radio_props={this.optionList}
-                                                        initial={this.state.c25bhepatitisindex ? this.state.c25bhepatitisindex : -1}
+                                                        initial={this.state.c25bhepatitisindex === 0 ? 0 : (this.state.c25bhepatitisindex ? this.state.c25bhepatitisindex : -1)}
                                                         onPress={(value, index) => { this.setState({ c25bhepatitis: value, c25bhepatitisindex: index }); console.log(this.state); }}
                                                     />
                                                 </View >
@@ -1612,7 +1922,7 @@ export default class ChildCampaignSurvey extends ValidationComponent {
                                                         formHorizontal={false}
                                                         labelHorizontal
                                                         radio_props={this.optionList}
-                                                        initial={this.state.c25cpolioindex ? this.state.c25cpolioindex : -1}
+                                                        initial={this.state.c25cpolioindex === 0 ? 0 : (this.state.c25cpolioindex ? this.state.c25cpolioindex : -1)}
                                                         onPress={(value, index) => { this.setState({ c25cpolio: value, c25cpolioindex: index }); console.log(this.state); }}
                                                     />
                                                 </View >
@@ -1626,7 +1936,7 @@ export default class ChildCampaignSurvey extends ValidationComponent {
                                                         formHorizontal={false}
                                                         labelHorizontal
                                                         radio_props={this.optionList}
-                                                        initial={this.state.c25dopvindex ? this.state.c25dopvindex : -1}
+                                                        initial={this.state.c25dopvindex === 0 ? 0 : (this.state.c25dopvindex ? this.state.c25dopvindex : -1)}
                                                         onPress={(value, index) => { this.setState({ c25dopv: value, c25dopvindex: index }); console.log(this.state); }}
                                                     />
                                                 </View >
@@ -1650,7 +1960,7 @@ export default class ChildCampaignSurvey extends ValidationComponent {
                                                         formHorizontal={false}
                                                         labelHorizontal
                                                         radio_props={this.optionList}
-                                                        initial={this.state.c29aipvindex ? this.state.c29aipvindex : -1}
+                                                        initial={this.state.c29aipvindex === 0 ? 0 : (this.state.c29aipvindex ? this.state.c29aipvindex : -1)}
                                                         onPress={(value, index) => { this.setState({ c29aipv: value, c29aipvindex: index }); console.log(this.state); }}
                                                     />
                                                 </View >
@@ -1664,7 +1974,7 @@ export default class ChildCampaignSurvey extends ValidationComponent {
                                                         formHorizontal={false}
                                                         labelHorizontal
                                                         radio_props={this.optionList}
-                                                        initial={this.state.c30apentaindex ? this.state.c30apentaindex : -1}
+                                                        initial={this.state.c30apentaindex === 0 ? 0 : (this.state.c30apentaindex ? this.state.c30apentaindex : -1)}
                                                         onPress={(value, index) => { this.setState({ c30apenta: value, c30apentaindex: index }); console.log(this.state); }}
                                                     />
                                                 </View >
@@ -1688,7 +1998,7 @@ export default class ChildCampaignSurvey extends ValidationComponent {
                                                         formHorizontal={false}
                                                         labelHorizontal
                                                         radio_props={this.optionList}
-                                                        initial={this.state.c31arotaindex ? this.state.c31arotaindex : -1}
+                                                        initial={this.state.c31arotaindex === 0 ? 0 : (this.state.c31arotaindex ? this.state.c31arotaindex : -1)}
                                                         onPress={(value, index) => { this.setState({ c31arota: value, c31arotaindex: index }); console.log(this.state); }}
                                                     />
                                                 </View >
@@ -1712,7 +2022,7 @@ export default class ChildCampaignSurvey extends ValidationComponent {
                                                         formHorizontal={false}
                                                         labelHorizontal
                                                         radio_props={this.optionList}
-                                                        initial={this.state.c32ajeindex ? this.state.c32ajeindex : -1}
+                                                        initial={this.state.c32ajeindex === 0 ? 0 : (this.state.c32ajeindex ? this.state.c32ajeindex : -1)}
                                                         onPress={(value, index) => { this.setState({ c32aje: value, c32ajeindex: index }); console.log(this.state); }}
                                                     />
                                                 </View >
@@ -1758,6 +2068,7 @@ export default class ChildCampaignSurvey extends ValidationComponent {
                                         labelHorizontal
                                         radio_props={this.optionList}
                                         initial={this.state.cs1scollectindex ? this.state.cs1scollectindex : -1}
+                                        initial={this.state.w3dobindex === 0 ? 0 : (this.state.w3dobindex ? this.state.w3dobindex : -1)}
                                         onPress={(value, index) => {
                                             this.setState({ cs1scollect: value, cs1scollectindex: index });
                                             if (value === '01') {
@@ -1781,7 +2092,7 @@ export default class ChildCampaignSurvey extends ValidationComponent {
                                                 formHorizontal={false}
                                                 labelHorizontal
                                                 radio_props={this.bloodreasonoptions}
-                                                initial={this.state.cs1ascollectnoindex ? this.state.cs1ascollectnoindex : -1}
+                                                initial={this.state.cs1ascollectnoindex === 0 ? 0 : (this.state.cs1ascollectnoindex ? this.state.cs1ascollectnoindex : -1)}
                                                 onPress={(value, index) => { this.setState({ cs1ascollectno: value, cs1ascollectnoindex: index }); console.log(this.state); }}
                                             />
                                         </View>
@@ -1809,7 +2120,7 @@ export default class ChildCampaignSurvey extends ValidationComponent {
                                                 formHorizontal={false}
                                                 labelHorizontal
                                                 radio_props={this.specimenmethodoptions}
-                                                initial={this.state.cs1scollecthowindex ? this.state.cs1scollecthowindex : -1}
+                                                initial={this.state.cs1scollecthowindex === 0 ? 0 : (this.state.cs1scollecthowindex ? this.state.cs1scollecthowindex : -1)}
                                                 onPress={(value, index) => {
                                                     this.setState({ cs1scollecthow: value, cs1scollecthowindex: index });
                                                     if (value === '01' || value === '02') {
@@ -1832,7 +2143,7 @@ export default class ChildCampaignSurvey extends ValidationComponent {
                                                 formHorizontal={false}
                                                 labelHorizontal
                                                 radio_props={this.specimenqualityoptions}
-                                                initial={this.state.cs5squalindex ? this.state.cs5squalindex : -1}
+                                                initial={this.state.cs5squalindex === 0 ? 0 : (this.state.cs5squalindex ? this.state.cs5squalindex : -1)}
                                                 onPress={(value, index) => { this.setState({ cs5squal: value, cs5squalindex: index }); console.log(this.state); }}
                                             />
                                         </View>
@@ -1847,7 +2158,7 @@ export default class ChildCampaignSurvey extends ValidationComponent {
                                                 formHorizontal={false}
                                                 labelHorizontal
                                                 radio_props={this.specimenproblemoptions}
-                                                initial={this.state.cs6sproblemindex ? this.state.cs6sproblemindex : -1}
+                                                initial={this.state.cs6sproblemindex === 0 ? 0 : (this.state.cs6sproblemindex ? this.state.cs6sproblemindex : -1)}
                                                 onPress={(value, index) => { this.setState({ cs6sproblem: value, cs6sproblemindex: index }); console.log(this.state); }}
                                             />
                                         </View>
@@ -1874,6 +2185,7 @@ export default class ChildCampaignSurvey extends ValidationComponent {
                                         labelHorizontal
                                         radio_props={this.dbssampleoptions}
                                         initial={this.state.cs7dcollectindex ? this.state.cs7dcollectindex : -1}
+                                        initial={this.state.w3dobindex === 0 ? 0 : (this.state.w3dobindex ? this.state.w3dobindex : -1)}
                                         onPress={(value, index) => {
                                             this.setState({ cs7dcollect: value, cs7dcollectindex: index });
                                             if (value === '01') {
@@ -1896,7 +2208,7 @@ export default class ChildCampaignSurvey extends ValidationComponent {
                                                 formHorizontal={false}
                                                 labelHorizontal
                                                 radio_props={this.bloodreasonoptions}
-                                                initial={this.state.cs7adcollectnoindex ? this.state.cs7adcollectnoindex : -1}
+                                                initial={this.state.cs7adcollectnoindex === 0 ? 0 : (this.state.cs7adcollectnoindex ? this.state.cs7adcollectnoindex : -1)}
                                                 onPress={(value, index) => { this.setState({ cs7adcollectno: value, cs7adcollectnoindex: index }); console.log(this.state); }}
                                             />
                                         </View>
@@ -1924,7 +2236,7 @@ export default class ChildCampaignSurvey extends ValidationComponent {
                                                 formHorizontal={false}
                                                 labelHorizontal
                                                 radio_props={this.spotsCollectedoptions}
-                                                initial={this.state.cs11dspotsindex ? this.state.cs11dspotsindex : -1}
+                                                initial={this.state.cs11dspotsindex === 0 ? 0 : (this.state.cs11dspotsindex ? this.state.cs11dspotsindex : -1)}
                                                 onPress={(value, index) => { this.setState({ cs11dspots: value, cs11dspotsindex: index }); console.log(this.state); }}
                                             />
                                         </View>
@@ -1939,7 +2251,7 @@ export default class ChildCampaignSurvey extends ValidationComponent {
                                                 formHorizontal={false}
                                                 labelHorizontal
                                                 radio_props={this.adequateoptions}
-                                                initial={this.state.cs12adqual1index ? this.state.cs12adqual1index : -1}
+                                                initial={this.state.cs12adqual1index === 0 ? 0 : (this.state.cs12adqual1index ? this.state.cs12adqual1index : -1)}
                                                 onPress={(value, index) => { this.setState({ cs12adqual1: value, cs12adqual1index: index }); console.log(this.state); }}
                                             />
                                         </View>
@@ -1954,7 +2266,7 @@ export default class ChildCampaignSurvey extends ValidationComponent {
                                                 formHorizontal={false}
                                                 labelHorizontal
                                                 radio_props={this.adequateoptions}
-                                                initial={this.state.cs12adqual2index ? this.state.cs12adqual2index : -1}
+                                                initial={this.state.cs12adqual2index === 0 ? 0 : (this.state.cs12adqual2index ? this.state.cs12adqual2index : -1)}
                                                 onPress={(value, index) => { this.setState({ cs12adqual2: value, cs12adqual2index: index }); console.log(this.state); }}
                                             />
                                         </View>
@@ -1969,7 +2281,7 @@ export default class ChildCampaignSurvey extends ValidationComponent {
                                                 formHorizontal={false}
                                                 labelHorizontal
                                                 radio_props={this.adequateoptions}
-                                                initial={this.state.cs12adqual3index ? this.state.cs12adqual3index : -1}
+                                                initial={this.state.cs12adqual3index === 0 ? 0 : (this.state.cs12adqual3index ? this.state.cs12adqual3index : -1)}
                                                 onPress={(value, index) => { this.setState({ cs12adqual3: value, cs12adqual3index: index }); console.log(this.state); }}
                                             />
                                         </View>
@@ -1984,7 +2296,7 @@ export default class ChildCampaignSurvey extends ValidationComponent {
                                                 formHorizontal={false}
                                                 labelHorizontal
                                                 radio_props={this.adequateoptions}
-                                                initial={this.state.cs12adqual4index ? this.state.cs12adqual4 : 0}
+                                                initial={this.state.cs12adqual4index === 0 ? 0 : (this.state.cs12adqual4index ? this.state.cs12adqual4index : -1)}
                                                 onPress={(value, index) => { this.setState({ cs12adqual4: value, cs12adqual4index: index }); console.log(this.state); }}
                                             />
                                         </View>
@@ -1999,7 +2311,7 @@ export default class ChildCampaignSurvey extends ValidationComponent {
                                                 formHorizontal={false}
                                                 labelHorizontal
                                                 radio_props={this.adequateoptions}
-                                                initial={this.state.cs12adqual5index ? this.state.cs12adqual5index : -1}
+                                                initial={this.state.cs12adqual5index === 0 ? 0 : (this.state.cs12adqual5index ? this.state.cs12adqual5index : -1)}
                                                 onPress={(value, index) => { this.setState({ cs12adqual5: value, cs12adqual5index: index }); console.log(this.state); }}
                                             />
                                         </View>
@@ -2014,7 +2326,7 @@ export default class ChildCampaignSurvey extends ValidationComponent {
                                                 formHorizontal={false}
                                                 labelHorizontal
                                                 radio_props={this.dbsspecimenproblemoptions}
-                                                initial={this.state.cs13dproblemindex ? this.state.cs13dproblemindex : -1}
+                                                initial={this.state.cs13dproblemindex === 0 ? 0 : (this.state.cs13dproblemindex ? this.state.cs13dproblemindex : -1)}
                                                 onPress={(value, index) => { this.setState({ cs13dproblem: value, cs13dproblemindex: index }); console.log(this.state); }}
                                             />
                                         </View>
@@ -2032,8 +2344,8 @@ export default class ChildCampaignSurvey extends ValidationComponent {
                                 <View style={{ marginBottom: 20 }}>
                                     <Text style={styles.headingLetter}>Interviewer observation (Related to Blood Collection)</Text>
                                     <FormInput
-                                        value={this.state.cs13adprobsp}
-                                        onChangeText={(cs13adprobsp) => this.setState({ cs13adprobsp })}
+                                        value={this.state.cs15intcomments}
+                                        onChangeText={(cs15intcomments) => this.setState({ cs15intcomments })}
                                     />
                                 </View>
                             </View>
