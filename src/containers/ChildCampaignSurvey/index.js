@@ -1,5 +1,5 @@
 import React from 'react';
-import { StyleSheet, ScrollView, View, Alert, DatePickerAndroid,ToastAndroid } from 'react-native';
+import { StyleSheet, ScrollView, View, Alert, DatePickerAndroid, ToastAndroid } from 'react-native';
 import _ from 'lodash';
 import moment from 'moment';
 import ValidationComponent from 'react-native-form-validator';
@@ -593,10 +593,12 @@ export default class ChildCampaignSurvey extends ValidationComponent {
                     _.forEach(capillarSampleCollected, (fieldKey) => {
                         this.checkValidationField(fieldKey, validation);
                     });
-                } else if (this.state.cs7dcollect === '02') {
+                }
+                if (this.state.cs7dcollect === '02') {
                     this.checkValidationField('cs7adcollectno', validation);
-                } else {
-                    validation.cs7dcollect = false;
+                }
+                if (this.state.cs7dcollect !== '02') {
+                    validation.cs7adcollectno = true;
                 }
             }
         } else {
@@ -798,7 +800,7 @@ export default class ChildCampaignSurvey extends ValidationComponent {
         if (this.isFormValid() && !(_.includes(_.values(RadioValidations), false))) {
             this.setState({
                 h1hhid: params.HouseholdID,
-                updatedTime: moment().format('MM-DD-YYY h:mm:ss a')
+                updatedTime: moment().format('DD-MM-YYYY h:mm:ss a')
             });
             let surveyID;
             if (this.state.editedField) {
@@ -845,46 +847,35 @@ export default class ChildCampaignSurvey extends ValidationComponent {
     }
     addBloodSampleCount(AgeGroup) {
         const clusterID = realm.objects('Cluster').filtered('status = "active"')[0].clusterID;
+        const { params } = this.props.navigation.state;
         realm.write(() => {
             if (AgeGroup === 'A') {
                 if (realm.objects('BloodSample')
-                    .filtered('Submitted = "active" && clusterID = $0', clusterID).length > 0) {
-                    const bloodsampleid = realm.objects('BloodSample').filtered('Submitted = "active" && clusterID = $0', clusterID)[0].id;
-                    const bloodSampleData = realm.objects('BloodSample').filtered('clusterID=$0', clusterID)[0].TypeA;
-                    realm.create('BloodSample', { id: bloodsampleid, TypeA: bloodSampleData + 1 }, true);
-                } else {
-                    realm.create('BloodSample', { id: new Date().getTime(), clusterID, TypeA: 1 });
+                    .filtered('Submitted = "active" && Type="A" && clusterID = $0 && Sno =$1', clusterID, params.Sno).length === 0) {
+                    realm.create('BloodSample', { id: new Date().getTime(), clusterID, Type: 'A', Sno: params.Sno });
                 }
-            } else if (realm.objects('BloodSample').filtered('Submitted = "active" && clusterID = $0', clusterID).length > 0) {
-                const bloodSampleData = realm.objects('BloodSample').filtered('clusterID=$0', clusterID)[0].TypeB;
-                const bloodsampleid = realm.objects('BloodSample').filtered('Submitted = "active" && clusterID = $0', clusterID)[0].id;
-                realm.create('BloodSample', { id: bloodsampleid, TypeB: bloodSampleData + 1 }, true);
-            } else {
-                realm.create('BloodSample', { id: new Date().getTime(), clusterID, TypeB: 1 });
+            } else if (realm.objects('BloodSample').filtered('Submitted = "active" && Type="B" && clusterID = $0 && Sno =$1', clusterID, params.Sno).length === 0) {
+                realm.create('BloodSample', { id: new Date().getTime(), clusterID, Type: 'B', Sno: params.Sno });
             }
         });
     }
     removeBloodSampleCount(AgeGroup) {
+        const { params } = this.props.navigation.state;
         const clusterID = realm.objects('Cluster').filtered('status = "active"')[0].clusterID;
-        const bloodsampleid = realm.objects('BloodSample').filtered('Submitted = "active" && clusterID = $0', clusterID)[0].id;
         if (AgeGroup === 'A') {
-            const bloodSampleData = realm.objects('BloodSample').filtered('clusterID=$0', clusterID)[0].TypeA;
-            realm.write(() => {
-                if (this.state.cs1scollect !== '01' && this.state.cs7dcollect !== '01') {
-                    if (bloodSampleData.TypeA > 0) {
-                        realm.create('BloodSample', { id: bloodsampleid, TypeA: bloodSampleData - 1 }, true);
-                    }
-                }
-            });
+            const bloodSampleData = realm.objects('BloodSample').filtered('Submitted = "active"  && Type="A" && clusterID = $0 && Sno =$1', clusterID, params.Sno);
+            if (bloodSampleData.length > 0) {
+                realm.write(() => {
+                    realm.delete(bloodSampleData);
+                });
+            }
         } else {
-            const bloodSampleData = realm.objects('BloodSample').filtered('clusterID=$0', clusterID)[0].TypeB;
-            realm.write(() => {
-                if (this.state.cs1scollect !== '01' && this.state.cs7dcollect !== '01') {
-                    if (bloodSampleData.TypeB > 0) {
-                        realm.create('BloodSample', { id: bloodsampleid, TypeB: bloodSampleData - 1 }, true);
-                    }
-                }
-            });
+            const bloodSampleData = realm.objects('BloodSample').filtered('Submitted = "active"  && Type="B" && clusterID = $0 && Sno =$1', clusterID, params.Sno);
+            if (bloodSampleData.length > 0) {
+                realm.write(() => {
+                    realm.delete(bloodSampleData);
+                });
+            }
         }
     }
     render() {
@@ -1010,7 +1001,7 @@ export default class ChildCampaignSurvey extends ValidationComponent {
                                         formHorizontal={false}
                                         labelHorizontal
                                         radio_props={this.optionListRelation}
-                                        initial={this.state.c5resrelationindex ? this.state.c5resrelationindex : -1}
+                                        initial={this.state.c5resrelationindex === 0 ? 0 : (this.state.c5resrelationindex ? this.state.c5resrelationindex : -1)}
                                         onPress={(value, index) => { this.setState({ c5resrelation: value, c5resrelationindex: index }); console.log(this.state); }}
                                     />
                                 </View >
@@ -1024,7 +1015,7 @@ export default class ChildCampaignSurvey extends ValidationComponent {
                                         formHorizontal={false}
                                         labelHorizontal
                                         radio_props={this.optionListBoolean}
-                                        initial={this.state.c6amomaliveindex ? this.state.c6amomaliveindex : -1}
+                                        initial={this.state.c6amomaliveindex === 0 ? 0 : (this.state.c6amomaliveindex ? this.state.c6amomaliveindex : -1)}
                                         onPress={(value, index) => { this.setState({ c6amomalive: value, c6amomaliveindex: index }); console.log(this.state); }}
                                     />
                                 </View >
@@ -1297,7 +1288,7 @@ export default class ChildCampaignSurvey extends ValidationComponent {
                                                 formHorizontal={false}
                                                 labelHorizontal
                                                 radio_props={this.optionList}
-                                                initial={this.state.c19mcvroutrecindex === 0 ? 0 : (this.state.c19mcvroutrecindexx ? this.state.c19mcvroutrecindex : -1)}
+                                                initial={this.state.c19mcvroutrecindex === 0 ? 0 : (this.state.c19mcvroutrecindex ? this.state.c19mcvroutrecindex : -1)}
                                                 onPress={(value, index) => { this.setState({ c19mcvroutrec: value, c19mcvroutrecindex: index }); console.log(this.state); }}
                                             />
                                         </View >
@@ -1351,8 +1342,8 @@ export default class ChildCampaignSurvey extends ValidationComponent {
                                                     <Text style={styles.headingLetter}>20a. Number of doses?</Text>
                                                     <FormInput
                                                         keyboardType='numeric'
-                                                        value={this.state.c19amcvroutrecdose}
-                                                        onChangeText={(c19amcvroutrecdose) => this.setState({ c19amcvroutrecdose })}
+                                                        value={this.state.c20amcvcampaigndose}
+                                                        onChangeText={(c20amcvcampaigndose) => this.setState({ c20amcvcampaigndose })}
                                                     />
                                                 </View>
                                                 <View style={{ marginBottom: 20 }}>
@@ -2051,7 +2042,7 @@ export default class ChildCampaignSurvey extends ValidationComponent {
                             />
                         </View>
 
-                        {this.state.c3areason === '01' &&
+                        {this.state.c3areason === '01' && this.state.eligible &&
                             <View>
                                 <View style={{ backgroundColor: '#e2e4e4', height: 50, display: 'flex', justifyContent: 'center' }}>
                                     <Text style={{ fontSize: 24, color: '#333', fontWeight: '500', textAlign: 'center' }}>SPECIMEN COLLECTION</Text>
@@ -2066,9 +2057,8 @@ export default class ChildCampaignSurvey extends ValidationComponent {
                                         buttonColor={'#4B5461'}
                                         formHorizontal={false}
                                         labelHorizontal
-                                        radio_props={this.optionList}
-                                        initial={this.state.cs1scollectindex ? this.state.cs1scollectindex : -1}
-                                        initial={this.state.w3dobindex === 0 ? 0 : (this.state.w3dobindex ? this.state.w3dobindex : -1)}
+                                        radio_props={this.optionListBoolean}
+                                        initial={this.state.cs1scollectindex === 0 ? 0 : (this.state.cs1scollectindex ? this.state.cs1scollectindex : -1)}
                                         onPress={(value, index) => {
                                             this.setState({ cs1scollect: value, cs1scollectindex: index });
                                             if (value === '01') {
@@ -2101,6 +2091,7 @@ export default class ChildCampaignSurvey extends ValidationComponent {
                                             <View style={{ marginBottom: 20 }}>
                                                 <Text style={styles.headingLetter}>1B. Specify other reason</Text>
                                                 <FormInput
+                                                    ref="cs1bscollectoth"
                                                     value={this.state.cs1bscollectoth}
                                                     onChangeText={(cs1bscollectoth) => this.setState({ cs1bscollectoth })}
                                                 />
@@ -2131,7 +2122,7 @@ export default class ChildCampaignSurvey extends ValidationComponent {
                                                 }}
                                             />
                                         </View>
-                                        <Text style={styles.headingLetter}>{`Specimen ID: ${this.state.specimenCapillaryID}`} :: {`Collection Date & Time: ${moment().format('MM-DD-YYY h:mm:ss a')}`}</Text>
+                                        <Text style={styles.headingLetterErr}>{`Specimen ID: ${this.state.specimenCapillaryID}`} :: {`Collection Date & Time: ${moment().format('DD-MM-YYYY h:mm:ss a')}`}</Text>
 
                                         <View style={{ marginBottom: 20, borderBottomWidth: 1, borderBottomColor: '#000', paddingBottom: 10 }}>
                                             <Text style={styles.headingLetter}>5. Specimen quality?</Text>
@@ -2167,6 +2158,7 @@ export default class ChildCampaignSurvey extends ValidationComponent {
                                             <View style={{ marginBottom: 20 }}>
                                                 <Text style={styles.headingLetter}>6A. Specify other reason</Text>
                                                 <FormInput
+                                                    ref="cs6asprobsp"
                                                     value={this.state.cs6asprobsp}
                                                     onChangeText={(cs6asprobsp) => this.setState({ cs6asprobsp })}
                                                 />
@@ -2184,8 +2176,7 @@ export default class ChildCampaignSurvey extends ValidationComponent {
                                         formHorizontal={false}
                                         labelHorizontal
                                         radio_props={this.dbssampleoptions}
-                                        initial={this.state.cs7dcollectindex ? this.state.cs7dcollectindex : -1}
-                                        initial={this.state.w3dobindex === 0 ? 0 : (this.state.w3dobindex ? this.state.w3dobindex : -1)}
+                                        initial={this.state.cs7dcollectindex === 0 ? 0 : (this.state.cs7dcollectindex ? this.state.cs7dcollectindex : -1)}
                                         onPress={(value, index) => {
                                             this.setState({ cs7dcollect: value, cs7dcollectindex: index });
                                             if (value === '01') {
@@ -2196,7 +2187,7 @@ export default class ChildCampaignSurvey extends ValidationComponent {
                                         }}
                                     />
                                 </View>
-                                {this.state.cs7dcollect !== '01' &&
+                                {this.state.cs7dcollect === '02' &&
                                     <View>
                                         <View style={{ marginBottom: 20, borderBottomWidth: 1, borderBottomColor: '#000', paddingBottom: 10 }}>
                                             <Text style={styles.headingLetter}>7A. Specify reason?</Text>
@@ -2216,6 +2207,7 @@ export default class ChildCampaignSurvey extends ValidationComponent {
                                             <View style={{ marginBottom: 20 }}>
                                                 <Text style={styles.headingLetter}>7B. Specify other reason</Text>
                                                 <FormInput
+                                                    ref="cs7bdcollectoth"
                                                     value={this.state.cs7bdcollectoth}
                                                     onChangeText={(cs7bdcollectoth) => this.setState({ cs7bdcollectoth })}
                                                 />
@@ -2225,7 +2217,7 @@ export default class ChildCampaignSurvey extends ValidationComponent {
                                 }
                                 {this.state.cs7dcollect === '01' &&
                                     <View>
-                                        <Text style={styles.headingLetter}>{`Specimen ID: ${this.state.specimenDBSID}`} :: {`Collection Date & Time: ${moment().format('MM-DD-YYY h:mm:ss a')}`}</Text>
+                                        <Text style={styles.headingLetterErr}>{`Specimen ID: ${this.state.specimenDBSID}`} :: {`Collection Date & Time: ${moment().format('DD-MM-YYYY h:mm:ss a')}`}</Text>
                                         <View style={{ marginBottom: 20, borderBottomWidth: 1, borderBottomColor: '#000', paddingBottom: 10 }}>
                                             <Text style={styles.headingLetter}>11. Number of spots collected?</Text>
                                             <RadioForm
@@ -2242,7 +2234,7 @@ export default class ChildCampaignSurvey extends ValidationComponent {
                                         </View>
 
                                         <View style={{ marginBottom: 20, borderBottomWidth: 1, borderBottomColor: '#000', paddingBottom: 10 }}>
-                                            <Text style={styles.headingLetter}>12A. Specimen quality DBS1?</Text>
+                                            <Text style={styles.headingLetter}>12A. SPECIMEN QUALITY DBS1?</Text>
                                             <RadioForm
                                                 animation={false}
                                                 style={{ marginTop: 20, marginLeft: 17, alignItems: 'flex-start' }}
@@ -2257,7 +2249,7 @@ export default class ChildCampaignSurvey extends ValidationComponent {
                                         </View>
 
                                         <View style={{ marginBottom: 20, borderBottomWidth: 1, borderBottomColor: '#000', paddingBottom: 10 }}>
-                                            <Text style={styles.headingLetter}>12B. Specimen quality DBS2?</Text>
+                                            <Text style={styles.headingLetter}>12B. SPECIMEN QUALITY DBS2?</Text>
                                             <RadioForm
                                                 animation={false}
                                                 style={{ marginTop: 20, marginLeft: 17, alignItems: 'flex-start' }}
@@ -2272,7 +2264,7 @@ export default class ChildCampaignSurvey extends ValidationComponent {
                                         </View>
 
                                         <View style={{ marginBottom: 20, borderBottomWidth: 1, borderBottomColor: '#000', paddingBottom: 10 }}>
-                                            <Text style={styles.headingLetter}>12C. Specimen quality DBS3?</Text>
+                                            <Text style={styles.headingLetter}>12C. SPECIMEN QUALITY DBS3?</Text>
                                             <RadioForm
                                                 animation={false}
                                                 style={{ marginTop: 20, marginLeft: 17, alignItems: 'flex-start' }}
@@ -2287,7 +2279,7 @@ export default class ChildCampaignSurvey extends ValidationComponent {
                                         </View>
 
                                         <View style={{ marginBottom: 20, borderBottomWidth: 1, borderBottomColor: '#000', paddingBottom: 10 }}>
-                                            <Text style={styles.headingLetter}>12D. Specimen quality DBS4?</Text>
+                                            <Text style={styles.headingLetter}>12D. SPECIMEN QUALITY DBS4?</Text>
                                             <RadioForm
                                                 animation={false}
                                                 style={{ marginTop: 20, marginLeft: 17, alignItems: 'flex-start' }}
@@ -2302,7 +2294,7 @@ export default class ChildCampaignSurvey extends ValidationComponent {
                                         </View>
 
                                         <View style={{ marginBottom: 20, borderBottomWidth: 1, borderBottomColor: '#000', paddingBottom: 10 }}>
-                                            <Text style={styles.headingLetter}>12E. Specimen quality DBS5?</Text>
+                                            <Text style={styles.headingLetter}>12E. SPECIMEN QUALITY DBS5?</Text>
                                             <RadioForm
                                                 animation={false}
                                                 style={{ marginTop: 20, marginLeft: 17, alignItems: 'flex-start' }}
@@ -2334,6 +2326,7 @@ export default class ChildCampaignSurvey extends ValidationComponent {
                                             <View style={{ marginBottom: 20 }}>
                                                 <Text style={styles.headingLetter}>13A. Specify other reason</Text>
                                                 <FormInput
+                                                    ref="cs13adprobsp"
                                                     value={this.state.cs13adprobsp}
                                                     onChangeText={(cs13adprobsp) => this.setState({ cs13adprobsp })}
                                                 />
@@ -2341,13 +2334,16 @@ export default class ChildCampaignSurvey extends ValidationComponent {
                                         }
                                     </View>
                                 }
-                                <View style={{ marginBottom: 20 }}>
-                                    <Text style={styles.headingLetter}>Interviewer observation (Related to Blood Collection)</Text>
-                                    <FormInput
-                                        value={this.state.cs15intcomments}
-                                        onChangeText={(cs15intcomments) => this.setState({ cs15intcomments })}
-                                    />
-                                </View>
+                                {(this.state.eligible) &&
+                                    <View style={{ marginBottom: 20 }}>
+                                        <Text style={styles.headingLetter}>15. Interviewer observation (Related to Blood Collection)</Text>
+                                        <FormInput
+                                            ref="cs15intcomments"
+                                            value={this.state.cs15intcomments}
+                                            onChangeText={(cs15intcomments) => this.setState({ cs15intcomments })}
+                                        />
+                                    </View>
+                                }
                             </View>
                         }
 

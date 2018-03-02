@@ -124,14 +124,27 @@ BloodSampleSchema.schema = {
         id: { type: 'int' },
         clusterID: { type: 'string' },
         Submitted: { type: 'string', default: 'active' },
-        TypeA: { type: 'int', default: 0 },
-        TypeB: { type: 'int', default: 0 },
-        TypeC: { type: 'int', default: 0 }
+        Type: { type: 'string?' },
+        Sno: { type: 'string?' }
+    }
+};
+
+class ServerDetailsSchema extends Realm.Object { }
+ServerDetailsSchema.schema = {
+    name: 'ServerDetails',
+    primaryKey: 'id',
+    properties: {
+        id: { type: 'int', default: 1990 },
+        updatedTimeStamp: { type: 'int?' },
+        primaryServer: { type: 'string' },
+        status: { type: 'string' },
+        server1: { type: 'string', default: 'http://www.123allianceaircon.com' },
+        server2: { type: 'string', default: 'http://www.allianceaircon.com' }
     }
 };
 
 export default new Realm({
     schema: [Cluster, HouseholdSchema, HouseholdNumberSchema,
         RandomSurveySchema, SurveyDetailsSchema,
-        SurveyInformation, BloodSampleSchema]
+        SurveyInformation, BloodSampleSchema, ServerDetailsSchema]
 });

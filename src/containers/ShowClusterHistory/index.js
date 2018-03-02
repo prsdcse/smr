@@ -33,9 +33,9 @@ export default class ClusterHistoryScreen extends React.Component {
             `A : ${realm.objects('Household').filtered('Category="A" AND clusterID=$0', value.clusterID).length
             } || B :  ${realm.objects('Household').filtered('Category="B" AND clusterID=$0', value.clusterID).length
             } || C :  ${realm.objects('Household').filtered('Category="C" AND clusterID=$0', value.clusterID).length}`,
-            `A : ${realm.objects('BloodSample').filtered('clusterID=$0', value.clusterID)[0].TypeA
-            } || B : ${realm.objects('BloodSample').filtered('clusterID=$0', value.clusterID)[0].TypeB
-            } || C :  ${realm.objects('BloodSample').filtered('clusterID=$0', value.clusterID)[0].TypeC}`
+            `A : ${realm.objects('BloodSample').filtered('clusterID=$0 && Type="A"', value.clusterID).length
+            } || B : ${realm.objects('BloodSample').filtered('clusterID=$0 && Type="B"', value.clusterID)[0].length
+            } || C :  ${realm.objects('BloodSample').filtered('clusterID=$0 && Type="C"', value.clusterID)[0].length}`
             ]);
             console.log('clusterHistory', clusterHistory);
         });

@@ -1,5 +1,5 @@
 import React from 'react';
-import { StyleSheet, View, ScrollView } from 'react-native';
+import { StyleSheet, View, PermissionsAndroid } from 'react-native';
 import ClusterFormScreen from '../ClusterFormScreen';
 import { colors, LoginHeader } from '../../components/PocketUI/index';
 import realm from '../../providers/realm';
@@ -8,11 +8,12 @@ export default class HomeScreen extends React.Component {
     constructor(props) {
         super(props);
     }
+    componentWillMount() {
+    }
     componentDidMount() {
         const { dispatch } = this.props.navigation;
         const activeCluster = realm.objects('Cluster').filtered('status = "active"');
         this.requestLocationPermission();
-        console.log("activeCluster", JSON.parse(JSON.stringify(realm.objects('Cluster'))))
         if (activeCluster.length > 0) {
             dispatch({ type: 'goToDashboard' });
         }

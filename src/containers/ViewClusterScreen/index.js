@@ -25,9 +25,9 @@ export default class ViewClusterScreen extends React.Component {
             headerStyle: { height: 60, borderWidth: 1, borderBottomColor: 'white', padding: 10 },
             headerRight: (
                 <Button
-                    buttonStyle={{ width: 170, height: 100, backgroundColor: '#4c9689' }}
-                    fontSize={30}
-                    title='Submit to Server'
+                    buttonStyle={{ width: 200, height: 100, backgroundColor: '#4c9689' }}
+                    fontSize={22}
+                    title='Submit Server'
                     onPress={params.handleSubmit}
                 />
             ),
@@ -102,7 +102,9 @@ export default class ViewClusterScreen extends React.Component {
                             CensusForm: this.state.householdList
                         };
                         console.log('postData', postData);
-                        axios.post('http://www.allianceaircon.com/MRSurvey/CensusDetails.php', postData)
+                        const serverURL = realm.objects('ServerDetails')[0].primaryServer;
+                        console.log('serverURL', serverURL);
+                        axios.post(serverURL + '/MRSurvey/CensusDetails.php', postData)
                             .then((response) => {
                                 console.log(response);
 
@@ -122,23 +124,26 @@ export default class ViewClusterScreen extends React.Component {
                                 });
                             })
                             .catch((error) => {
-                                console.log(JSON.stringify(error));
-                                if (JSON.stringify(error).status == '503' || JSON.stringify(error).status == '503') {
-                                    if (realm.objects('ServerUnavailable').length == 0) {
-                                        realm.write(() => {
-                                            realm.create('ServerUnavailable', { updatedTimeStamp: new Date() });
-                                        });
-                                    } else {
-                                        const lastUpdatedTime = JSON.parse(JSON.stringify(realm.objects('ServerUnavailable')))[0].updatedTimeStamp;
+                                if (realm.objects('ServerDetails').filtered('status="open"').length > 0) {
+                                    const lastUpdatedTime = realm.objects('ServerDetails')[0].updatedTimeStamp;
+                                    if (lastUpdatedTime) {
                                         const timeDifference = Math.floor((new Date().getTime() - lastUpdatedTime) / (1000 * 60));
-                                        if (timeDifference > 15) {
-
+                                        if (timeDifference > 1) {
+                                            realm.write(() => {
+                                                realm.create('ServerDetails', { primaryServer: realm.objects('ServerDetails')[0].server2, status: 'updated', updatedTimeStamp: new Date().getTime(), id: 1990 }, true);
+                                            });
                                         }
+                                    }
+                                    else {
+                                        realm.write(() => {
+                                            realm.create('ServerDetails', { updatedTimeStamp: new Date().getTime(), id: 1990 }, true);
+                                        });
                                     }
                                 }
                                 this.setState({
                                     loading: false
                                 });
+                                alert('Server Unavailable. Try again after sometime');
                                 dispatch({ type: 'goToDashboard' });
                             });
                         console.log('submit clutser information', postData);

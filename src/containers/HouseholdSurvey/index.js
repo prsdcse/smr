@@ -68,7 +68,7 @@ export default class HouseHoldSurvey extends ValidationComponent {
             { value: '03', label: 'Son or daughter' },
             { value: '04', label: 'Brother or sister' },
             { value: '05', label: 'In-Law' },
-            { value: '06', label: 'parent or guardian' },
+            { value: '06', label: 'parent or grand parent' },
             { value: '07', label: 'Other relative' },
             { value: '08', label: 'Other' }
         ];

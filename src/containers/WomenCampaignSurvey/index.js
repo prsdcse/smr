@@ -305,10 +305,12 @@ export default class WomenCampaignSurvey extends ValidationComponent {
                             _.forEach(capillarSampleCollected, (fieldKey) => {
                                 this.checkValidationField(fieldKey, validation);
                             });
-                        } else if (this.state.ws7dcollect === '02') {
+                        }
+                        if (this.state.ws7dcollect === '02') {
                             this.checkValidationField('ws7adcollectno', validation);
-                        } else {
-                            validation.ws7dcollect = false;
+                        }
+                        if (this.state.ws7dcollect !== '02') {
+                            validation.ws7adcollectno = true;
                         }
                     } else {
                         _.forEach(Object.keys(this.state), (fieldKey) => {
@@ -421,7 +423,7 @@ export default class WomenCampaignSurvey extends ValidationComponent {
         if (this.isFormValid() && !(_.includes(_.values(RadioValidations), false))) {
             this.setState({
                 h1hhid: params.HouseholdID,
-                updatedTime: moment().format('MM-DD-YYY h:mm:ss a')
+                updatedTime: moment().format('DD-MM-YYYY h:mm:ss a')
             });
             let surveyID;
             if (this.state.editedField) {
@@ -469,27 +471,23 @@ export default class WomenCampaignSurvey extends ValidationComponent {
     }
     addBloodSampleCount() {
         const clusterID = realm.objects('Cluster').filtered('status = "active"')[0].clusterID;
+        const { params } = this.props.navigation.state;
         realm.write(() => {
-            if (realm.objects('BloodSample').filtered('Submitted = "active" && clusterID = $0', clusterID).length > 0) {
-                const bloodsampleid = realm.objects('BloodSample').filtered('Submitted = "active" && clusterID = $0', clusterID)[0].id;
-                const bloodSampleData = realm.objects('BloodSample').filtered('clusterID=$0', clusterID)[0].TypeC;
-                realm.create('BloodSample', { id: bloodsampleid, TypeC: bloodSampleData + 1 }, true);
-            } else {
-                realm.create('BloodSample', { id: new Date().getTime(), clusterID, TypeC: 1 });
+            if (realm.objects('BloodSample')
+                .filtered('Submitted = "active" && Type="C" && clusterID = $0 && Sno =$1', clusterID, params.Sno).length === 0) {
+                realm.create('BloodSample', { id: new Date().getTime(), clusterID, Type: 'C', Sno: params.Sno });
             }
         });
     }
     removeBloodSampleCount() {
         const clusterID = realm.objects('Cluster').filtered('status = "active"')[0].clusterID;
-        const bloodSampleData = realm.objects('BloodSample').filtered('clusterID=$0', clusterID)[0].TypeC;
-        const bloodsampleid = realm.objects('BloodSample').filtered('Submitted = "active" && clusterID = $0', clusterID)[0].id;
-        realm.write(() => {
-            if (this.state.ws1scollect !== '01' && this.state.ws7dcollect !== '01') {
-                if (bloodSampleData.TypeC > 0) {
-                    realm.create('BloodSample', { id: bloodsampleid, TypeC: bloodSampleData - 1 }, true);
-                }
-            }
-        });
+        const { params } = this.props.navigation.state;
+        const bloodSampleData = realm.objects('BloodSample').filtered('Submitted = "active"  && Type="C" && clusterID = $0 && Sno =$1', clusterID, params.Sno);
+        if (bloodSampleData.length > 0) {
+            realm.write(() => {
+                realm.delete(bloodSampleData);
+            });
+        }
     }
     render() {
         const { params } = this.props.navigation.state;

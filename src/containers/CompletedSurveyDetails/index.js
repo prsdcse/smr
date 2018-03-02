@@ -66,7 +66,9 @@ export default class CompletedSurveyDetails extends React.Component {
                             const postData = {
                                 surveyDetails: this.state.surveyDatafromRealm
                             };
-                            axios.post('http://www.allianceaircon.com/MRSurvey/Survey_information.php', postData)
+                            const serverURL = realm.objects('ServerDetails')[0].primaryServer;
+                            console.log(serverURL);
+                            axios.post(serverURL + '/MRSurvey/Survey_information.php', postData)
                                 .then((response) => {
                                     console.log(response);
 

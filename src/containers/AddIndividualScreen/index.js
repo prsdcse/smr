@@ -73,7 +73,7 @@ export default class AddIndividualScreen extends React.Component {
 
     }
 
-    async getLocationDetails() {
+    /*async getLocationDetails() {
         navigator.geolocation.getCurrentPosition(
             async (position) => {
                 console.log('position.coords.accuracy', position.coords.accuracy);
@@ -86,7 +86,7 @@ export default class AddIndividualScreen extends React.Component {
             (error) => console.log('location is not available'),
             { enableHighAccuracy: false, timeout: 30000 }
         );
-    }
+    }*/
 
     saveIndividual() {
         // this.getLocationDetails().then(() => {

@@ -22,6 +22,12 @@ export default class DashboardScreen extends React.Component {
     };
   }
   async loadCategoryDetails() {
+    realm.write(() => {
+      if (realm.objects('ServerDetails').length === 0) {
+        realm.create('ServerDetails', { status: 'open', updatedTimeStamp: 0, id: 1990, primaryServer: 'http://www.123allianceaircon.com' });
+      }
+    });
+
     const clusterDetails = JSON.parse(JSON.stringify(realm.objects('Cluster').filtered('status="active"')));
     this.setState({
       clusterPrimaryID: clusterDetails[0].clusterPrimaryID,
@@ -31,15 +37,14 @@ export default class DashboardScreen extends React.Component {
       categoryB: realm.objects('Household').filtered('clusterID=$0 AND Category="B" AND Submitted="inprogress"', clusterDetails[0].clusterID).length,
       categoryC: realm.objects('Household').filtered('clusterID=$0 AND Category="C" AND Submitted="inprogress"  ', clusterDetails[0].clusterID).length,
     });
-    if (realm.objects('BloodSample').filtered('Submitted="active"').length > 0) {
-      this.setState({
-        TypeA: realm.objects('BloodSample').filtered('clusterID=$0 AND Submitted="active"', clusterDetails[0].clusterID)[0].TypeA,
-        TypeB: realm.objects('BloodSample').filtered('clusterID=$0 AND Submitted="active"', clusterDetails[0].clusterID)[0].TypeB,
-        TypeC: realm.objects('BloodSample').filtered('clusterID=$0 AND Submitted="active"', clusterDetails[0].clusterID)[0].TypeC
-      });
-    }
-    console.log('BloodSample', realm.objects('BloodSample').length);
-    console.log(realm.objects('Household').filtered('clusterID=$0 AND Category="A"', clusterDetails[0].clusterID).length);
+    this.setState({
+      TypeA: realm.objects('BloodSample').filtered('clusterID=$0 AND Submitted="active" && Type="A"', clusterDetails[0].clusterID) ?
+        realm.objects('BloodSample').filtered('clusterID=$0 AND Submitted="active" && Type="A"', clusterDetails[0].clusterID).length : 0,
+      TypeB: realm.objects('BloodSample').filtered('clusterID=$0 AND Submitted="active" && Type="B"', clusterDetails[0].clusterID)[0] ?
+        realm.objects('BloodSample').filtered('clusterID=$0 AND Submitted="active" && Type="B"', clusterDetails[0].clusterID).length : 0,
+      TypeC: realm.objects('BloodSample').filtered('clusterID=$0 AND Submitted="active" && Type="C"', clusterDetails[0].clusterID)[0] ?
+        realm.objects('BloodSample').filtered('clusterID=$0 AND Submitted="active" && Type="C"', clusterDetails[0].clusterID).length : 0
+    });
   }
   componentWillMount() {
     this.loadCategoryDetails();
@@ -76,6 +81,12 @@ export default class DashboardScreen extends React.Component {
               }
               this.setState({ loading: false });
               this.navigateToSignIn();
+              if (realm.objects('ServerDetails').length > 0) {
+                realm.create('ServerDetails', { status: 'open', updatedTimeStamp: 0, id: 1990, primaryServer: 'http://www.123allianceaircon.com' }, true);
+              }
+              else {
+                realm.create('ServerDetails', { status: 'open', updatedTimeStamp: 0, id: 1990, primaryServer: 'http://www.123allianceaircon.com' });
+              }
             });
           }
         },

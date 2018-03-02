@@ -31,7 +31,9 @@ export default class RandomListScreen extends React.Component {
                     {
                         text: 'Generate',
                         onPress: () => {
-                            axios.post('http://www.allianceaircon.com/MRSurvey/surveydetails_request.php', {
+                            const serverURL = realm.objects('ServerDetails')[0].primaryServer;
+                            console.log(serverURL);
+                            axios.post(serverURL + '/MRSurvey/surveydetails_request.php', {
                                 ClusterId
                             })
                                 .then((response) => {
@@ -71,7 +73,27 @@ export default class RandomListScreen extends React.Component {
                                     }
                                 })
                                 .catch((error) => {
-                                    console.log(error);
+                                    if (realm.objects('ServerDetails').filtered('status="open"').length > 0) {
+                                        const lastUpdatedTime = realm.objects('ServerDetails')[0].updatedTimeStamp;
+                                        if (lastUpdatedTime) {
+                                            const timeDifference = Math.floor((new Date().getTime() - lastUpdatedTime) / (1000 * 60));
+                                            if (timeDifference > 1) {
+                                                realm.write(() => {
+                                                    realm.create('ServerDetails', { primaryServer: realm.objects('ServerDetails')[0].server2, status: 'updated', updatedTimeStamp: new Date().getTime(), id: 1990 }, true);
+                                                });
+                                            }
+                                        }
+                                        else {
+                                            realm.write(() => {
+                                                realm.create('ServerDetails', { updatedTimeStamp: new Date().getTime(), id: 1990 }, true);
+                                            });
+                                        }
+                                    }
+                                    this.setState({
+                                        loading: false
+                                    });
+                                    alert('Server Unavailable. Try again after sometime');
+                                    navigate('Dashboard');
                                 });
                         }
                     }
@@ -87,7 +109,7 @@ export default class RandomListScreen extends React.Component {
     render() {
         const { navigate } = this.props.navigation;
         return (
-            <ScrollView style={{ backgroundColor: '#e9e9e9'}}>
+            <ScrollView style={{ backgroundColor: '#e9e9e9' }}>
                 {(this.state.loading) &&
                     <View style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', backgroundColor: '#fff' }}>
                         <Text style={{ fontSize: 28, fontWeight: '500' }}>Loading...</Text>
