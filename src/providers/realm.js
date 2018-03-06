@@ -138,8 +138,8 @@ ServerDetailsSchema.schema = {
         updatedTimeStamp: { type: 'int?' },
         primaryServer: { type: 'string' },
         status: { type: 'string' },
-        server1: { type: 'string', default: 'http://www.123allianceaircon.com' },
-        server2: { type: 'string', default: 'http://www.allianceaircon.com' }
+        server1: { type: 'string', default: 'http://www.allianceaircon.com' },
+        server2: { type: 'string', default: 'http://www.nie.gov.in' }
     }
 };
 

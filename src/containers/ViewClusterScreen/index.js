@@ -119,8 +119,16 @@ export default class ViewClusterScreen extends React.Component {
                                     this.setState({
                                         loading: false
                                     });
-                                    alert('Enumeration data submitted to server successfully');
-                                    dispatch({ type: 'goToDashboard' });
+
+                                    Alert.alert(
+                                        'Enumeration Submission',
+                                        'Enumeration data submitted to server successfully',
+                                        [
+                                            { text: 'OK', onPress: () => this._goHome() },
+                                        ],
+                                        { cancelable: false }
+                                    );
+
                                 });
                             })
                             .catch((error) => {
@@ -143,8 +151,14 @@ export default class ViewClusterScreen extends React.Component {
                                 this.setState({
                                     loading: false
                                 });
-                                alert('Server Unavailable. Try again after sometime');
-                                dispatch({ type: 'goToDashboard' });
+                                Alert.alert(
+                                    'Enumeration Submission',
+                                    'Server Unavailable. Try again after sometime',
+                                    [
+                                        { text: 'OK', onPress: () => this._goHome() },
+                                    ],
+                                    { cancelable: false }
+                                );
                             });
                         console.log('submit clutser information', postData);
                     }

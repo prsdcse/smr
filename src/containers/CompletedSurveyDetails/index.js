@@ -78,13 +78,23 @@ export default class CompletedSurveyDetails extends React.Component {
                                         _.forEach(completedSurvey, (survey) => {
                                             realm.create('SurveyInformation', { surveyID: survey.surveyID, status: 'completed' }, true);
                                         });
-                                        const bloodsampleid = realm.objects('BloodSample').filtered('Submitted="active" && clusterID=$0', clusterID)[0].id;
-                                        realm.create('BloodSample', { id: bloodsampleid, Submitted: 'completed' }, true);
+                                        if (realm.objects('BloodSample').filtered('Submitted="active" && clusterID=$0', clusterID).length > 0) {
+                                            const bloodSampleData = JSON.parse(JSON.stringify(realm.objects('BloodSample').filtered('Submitted="active" && clusterID=$0', clusterID)));
+                                            _.forEach(bloodSampleData, (bloodSample) => {
+                                                realm.create('BloodSample', { id: bloodSample.id, Submitted: 'completed' }, true);
+                                            });
+                                        }
                                         this.setState({
                                             loading: false
                                         });
-                                        alert('Survey data submitted to server successfully');
-                                        dispatch({ type: 'goToDashboard' });
+                                        Alert.alert(
+                                            'Survey Submission',
+                                            'Survey data submitted to server successfully',
+                                            [
+                                                { text: 'OK', onPress: () => dispatch({ type: 'goToDashboard' }) },
+                                            ],
+                                            { cancelable: false }
+                                        );
                                     });
                                 })
                                 .catch((error) => {
@@ -122,7 +132,17 @@ export default class CompletedSurveyDetails extends React.Component {
 
         return (
             <ScrollView style={{ backgroundColor: 'white', paddingTop: 20, paddingBottom: 20 }}>
-                {this.state.surveyDetails.map((survey, index) => (<Card
+                {(this.state.loading) &&
+                    <ScrollView style={{ backgroundColor: 'white', opacity: 0.7 }}>
+                        <View style={{ marginTop: 250, marginLeft: 160 }}>
+                            {/* <Image
+                                source={require('../../images/loader.gif')}
+                            /> */}
+                            <Text style={{ fontSize: 40, marginTop: 100 }}>Loading....</Text>
+                        </View>
+                    </ScrollView>
+                }
+                {(!this.state.loading) && this.state.surveyDetails.map((survey, index) => (<Card
                     key={index}
                     onPress={() => navigate('ViewCompletedSurveyDetails', { individualInfo: survey[0].IndividualInfo, HouseholdID: survey[0].HouseholdID })}
                     title={`Head Name : ${survey[0].HoueholdHead}`}

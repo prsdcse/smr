@@ -24,7 +24,7 @@ export default class DashboardScreen extends React.Component {
   async loadCategoryDetails() {
     realm.write(() => {
       if (realm.objects('ServerDetails').length === 0) {
-        realm.create('ServerDetails', { status: 'open', updatedTimeStamp: 0, id: 1990, primaryServer: 'http://www.123allianceaircon.com' });
+        realm.create('ServerDetails', { status: 'open', updatedTimeStamp: 0, id: 1990, primaryServer: 'http://www.allianceaircon.com' });
       }
     });
 
@@ -75,17 +75,17 @@ export default class DashboardScreen extends React.Component {
               realm.delete(realm.objects('RandomSurvey'));
               realm.delete(realm.objects('SurveyDetails'));
               realm.delete(realm.objects('SurveyInformation'));
-              if (realm.objects('BloodSample').length > 0) {
+              if (realm.objects('BloodSample').filtered('Submitted!="deleted"').length > 0) {
                 const bloodsampleid = realm.objects('BloodSample').filtered('Submitted="active" || Submitted="completed" && clusterID=$0', this.state.clusterID)[0].id;
                 realm.create('BloodSample', { id: bloodsampleid, Submitted: 'deleted' }, true);
               }
               this.setState({ loading: false });
               this.navigateToSignIn();
               if (realm.objects('ServerDetails').length > 0) {
-                realm.create('ServerDetails', { status: 'open', updatedTimeStamp: 0, id: 1990, primaryServer: 'http://www.123allianceaircon.com' }, true);
+                realm.create('ServerDetails', { status: 'open', updatedTimeStamp: 0, id: 1990, primaryServer: 'http://www.allianceaircon.com' }, true);
               }
               else {
-                realm.create('ServerDetails', { status: 'open', updatedTimeStamp: 0, id: 1990, primaryServer: 'http://www.123allianceaircon.com' });
+                realm.create('ServerDetails', { status: 'open', updatedTimeStamp: 0, id: 1990, primaryServer: 'http://www.allianceaircon.com' });
               }
             });
           }
