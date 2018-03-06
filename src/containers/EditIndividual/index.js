@@ -66,8 +66,9 @@ export default class EditIndividual extends React.Component {
         if (this.state.selectedDate) {
             end = moment(this.state.selectedDate);
         } else {
-            const dobString = String(this.state.dob).split('-');
-            end = moment(`${dobString[2]}0${dobString[1]}${dobString[0]}`);
+            end = moment(new Date(this.state.dob));
+            //const dobString = String(this.state.dob).split('-');
+            //end = moment(`${dobString[2]}0${dobString[1]}${dobString[0]}`);
         }
         const duration = moment.duration(now.diff(end));
         const days = duration.asDays();
@@ -112,7 +113,6 @@ export default class EditIndividual extends React.Component {
                 ToastAndroid.SHORT,
                 ToastAndroid.CENTER
             );
-            navigate;
             navigate('ViewCluster');
         } else {
             alert('Mandatory fields cannot be left empty');
